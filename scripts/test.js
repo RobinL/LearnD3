@@ -1,75 +1,72 @@
 
 window.onload = function() {
 
- dataset = [];
+w = window.innerWidth-5;
+h = window.innerHeight-5;
 
-for (var i = 1; i<100; i++) {
-	dataset.push((Math.cos(i/5)+1.1)*8);
-}
-
-
-
-
- w = 1500;
- h = 800;
+padding = 40;
 
 svg = d3.select("body")
 	.append("svg")
-	.attr("width", w)
-	.attr("height", h);
+	.attr("width", w-20)
+	.attr("height", h-20)
 
-rectangles = svg.selectAll("rect")
-	.data(dataset)
-	.enter()
-	.append("rect")
-	.attr("x",0)
-	.attr("y",0)
-	.attr("width",10)
-	.attr("height",100);
+w = svg[0][0]["clientWidth"];
+h = svg[0][0]["clientHeight"];
 
-rectangles.attr("x", function(d,i) {
-	return i * 11;
-});
-
-rectangles.attr("height",function(d) { return d*20;});
-
-rectangles.attr("y",function(d) { return h-d*20;});
-
-
-};
-
-var j = 1;
-
-
-
-
-d3.timer(function() {
-  
-dataset = [];
-
-j=j+0.1;
-
-for (var i = 1; i<100; i++) {
-	dataset.push((Math.cos((i+j)/5)+1.1)*8 +Math.sin(i/8.2)*5+5);
+var dataset  = [];
+for (var i = 0; i < 100; i++) {
+	dataset.push(Math.random()*100);
 }
 
 
-rectangles = svg.selectAll("rect")
-	.data(dataset);
+//domain goes in
 
-	
+domainMin = d3.min(dataset);
+domainMax = d3.max(dataset);
 
-rectangles.attr("x", function(d,i) {
-	return i * 11;
-});
+domainMin = 0;
+domainMax = 100;
 
-rectangles.attr("height",function(d) { return d*20;});
+rangeMin = padding;
+rangeMax = w-padding;
 
-rectangles.attr("y",function(d) { return h-d*20;});
+//range comes out
 
-rectangles.attr("fill", function(d,i) {
-	return d3.rgb(i*2,255-5*i,d*5)
-})
+var xScale = d3.scale.linear()
+				.domain([domainMin,domainMax])
+				.range([rangeMin,rangeMax]);
 
 
- });
+var xAxis = d3.svg.axis()
+	.scale(xScale);
+
+var xAxisSvg = svg.append("g")
+	.attr("class","axis")
+	.call(xAxis);
+
+xAxisSvg.attr("transform","translate(0," + (h-padding) + ")");
+
+
+rangeMin = padding;
+rangeMax = h-padding;
+
+var yScale = d3.scale.linear()
+	.domain([0,100])
+	.range([rangeMax,rangeMin]);
+
+var yAxis = d3.svg.axis()
+	.scale(yScale)
+	.orient("left");
+
+var yAxisSvg = svg.append("g")
+	.attr("class","axis")
+	.call(yAxis);
+
+yAxisSvg.attr("transform","translate(" + padding + ",0)");
+
+
+
+
+
+};

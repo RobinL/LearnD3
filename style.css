@@ -1,10 +1,18 @@
 .axis path,
 .axis line {
 	fill: none;
-	stroke: black;
+	stroke: #666666;
 	shape-rendering:crispEdges;
+}
+.axis text {
+	fill: #666666;
 }
 
 svg {
-	border: 1px solid black;
+	border: 1px solid #C9C9C9;
 }
+
+circle {
+	stroke-width: 1px;
+}
+

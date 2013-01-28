@@ -1,5 +1,3 @@
-
-
 w = window.innerWidth-25;
 h = window.innerHeight-25;
 padding = 40;
@@ -12,154 +10,233 @@ svg = d3.select("body")
 w = svg[0][0]["clientWidth"];
 h = svg[0][0]["clientHeight"];
 
-var dataset  = [];
-for (var i = 0; i < 150; i++) {
-	dataset.push(
-		[Math.random()*100, Math.random()*100, Math.random()*100]);
+
+
+
+//JSON data containing starting points and ranges
+var data = [
+	{offenceName: "ABH",
+	colour: "#0072c1",
+	offencesRanges: [
+		{
+		name: "Category 3",
+		bottom: "Fine",
+		startingpoint: "Community Order",
+		top: "Community Order"
+		},
+		{
+		name: "Category 2",
+		bottom: "Community Order",
+		startingpoint: 0.5,
+		top: 51/52
+		},
+		{
+		name: "Category 1"
+		bottom: 1,
+		startingpoint: 1.5,
+		top: 3
+		}]
+	},
+	{offenceName: "GBH with intent",
+	colour: "#0072c1",
+	offencesRanges: [
+		{bottom: 3,
+		startingpoint: 4,
+		top: 5
+		},
+		{bottom: 5,
+		startingpoint: 6,
+		top: 9
+		},
+		{bottom: 9,
+		startingpoint: 12,
+		top: 16
+		}]
+	}
+
+
+
+
+	];
+
+
+var disposalWidth = 300+padding;
+var custodyWidth = 150;
+
+var bottomAxisPosition = 500;
+
+var glHeight = 10;
+var glSpacing = 50;
+
+
+
+
+/////////////////////////////////////////////////
+//Axes and scales
+/////////////////////////////////////////////////
+
+
+
+//An ordinal scale to cover discharge,fine,community order
+var disposalScale = d3.scale.ordinal()
+						.domain(["Discharge","Fine", "Community Order"])
+						.rangeBands([padding,disposalWidth]);
+
+//disposalScale("Community Order") -> 80
+//disposalScale.rangeBand() -> 40
+
+var disposalAxis = d3.svg.axis().scale(disposalScale);
+
+svg.append("g")
+	.attr("class", "axes");
+
+svg.select(".axes")
+	.append("g")
+	.attr("class", "axis")
+	.call(disposalAxis);
+
+
+maxDisposal = disposalScale.rangeExtent()[1];
+maxCust01 = maxDisposal+custodyWidth*2;
+
+var custodyScale01 = d3.scale.linear()
+						.domain([0,1])
+						.range([maxDisposal,maxCust01]);
+
+var custodyScaleAxis01 = d3.svg.axis().scale(custodyScale01).ticks(2);
+
+svg.select(".axes").append("g")
+	.attr("class", "axis")
+	.call(custodyScaleAxis01);
+
+
+var custodyScales=[];
+var custodyScaleAxes = [];
+
+for (var i = 0; i < 5; i++) {
+
+	var min = maxCust01 + custodyWidth*i;
+	var max = maxCust01 + custodyWidth*(i+1);
+
+	var domainMin = Math.pow(2,i);
+	var domainMax = Math.pow(2,i+1);
+
+	custodyScales[i] = d3.scale.linear()
+							.domain([domainMin,domainMax])
+							.range([min,max]);
+
+	custodyScaleAxes[i] = d3.svg.axis().scale(custodyScales[i]).ticks((i)*2);
+
+	svg.select(".axes").append("g")
+		.attr("class", "axis")
+		.call(custodyScaleAxes[i]);
+	
 }
 
 
-//should try to use the nice function
-//domainMin = d3.min(dataset);
-//domainMax = d3.max(dataset);
+/////////////////////////////////////////////////
+//Draw guideline ranges
+/////////////////////////////////////////////////
+
+svg.select(".axes")
+.attr("transform", "translate(0," + bottomAxisPosition + ")");
+
+var sentenceToPositionMapper = function(sentence, topOrBottom) {
+
+	var returnVal;
+
+	if (sentence === "Discharge" || sentence ==="Fine" || sentence === "Community Order"){
+
+		returnVal = disposalScale(sentence);
+
+		if (topOrBottom === 1) {
+			returnVal += disposalScale.rangeBand();
+		}
+
+		return returnVal;
+
+	}
 
 
+	if (inDomain(sentence, custodyScale01.domain())) {
+			return custodyScale01(sentence);
+		}
 
-/////////////////////////////////////////////
-//Axes
-//////////////////////////////////////////////
+	for (var i = 0; i < 5; i++) {
+		if (inDomain(sentence, custodyScales[i].domain())) {
+			return custodyScales[i](sentence);
+		}
+	}
 
-
-
-domainMin = 0;
-domainMax = 100;
-
-rangeMin = padding;
-rangeMax = w-padding;
-
-//range comes out
-
-var xScale = d3.scale.linear()
-				.domain([domainMin,domainMax])
-				.range([rangeMin,rangeMax]);
+};
 
 
-var xAxis = d3.svg.axis()
-	.scale(xScale);
+var inDomain = function(num,arr) {
 
-var xAxisSvg = svg.append("g")
-	.attr("class","axis")
-	.call(xAxis);
+	if (num>=arr[0] & num<= arr[1]) {
+		return true;
+	}
+	else {
+		return false;
+	}
 
-xAxisSvg.attr("transform","translate(0," + (h-padding) + ")");
-
-
-rangeMin = padding;
-rangeMax = h-padding;
-
-var yScale = d3.scale.linear()
-	.domain([0,100])
-	.range([rangeMax,rangeMin]);
-
-var yAxis = d3.svg.axis()
-	.scale(yScale)
-	.orient("left");
-
-var yAxisSvg = svg.append("g")
-	.attr("class","axis")
-	.call(yAxis);
-
-yAxisSvg.attr("transform","translate(" + padding + ",0)");
-
-
-
-/////////////////////////////////////////////
-//Plotpoints
-//////////////////////////////////////////////
-
-var circles = svg.selectAll("circle")
-				.data(dataset)
-				.enter()
-				.append("circle");
-
-
-
-circles.attr("cx", function(d) {
-	return xScale(d[0]);
-	})
-	.attr("cy", function(d) {
-		return yScale(d[1]);
-	});
-
-
-
-domainMin = d3.min(dataset,function(d) {return (d [2]);});
-domainMax = d3.max(dataset,function(d) {return (d [2]);});
-
-var circleScale = d3.scale.linear()
-					.domain([domainMin, domainMax])
-					.range([2,20]);
-
-circles.attr("r",function(d) {
-		return circleScale(d[2]);
-	});
-
-var circleColourScale = d3.scale.linear()
-							.domain([domainMin, domainMax])
-							.range([0,255]);
-
-circles.attr("fill", function(d){
-
-	col = circleColourScale(d[2]);
-	return d3.rgb(255-col,col,col);
-
-});
-
-circles.attr("stroke", function(d){
-
-	col = circleColourScale(d[2]);
-	return d3.rgb(col,255-col,255);
-
-});
-
-
-/////////////////////////////////////////////
-//Updates and transitions 
-//////////////////////////////////////////////
-
-
-d3.select("svg")
-.on("click", function() {
-
-var dataset  = [];
-for (var i = 0; i < 150; i++) {
-	dataset.push(
-		[Math.random()*100, Math.random()*100, Math.random()*100]);
 }
 
+// a = sentenceToPositionMapper(0);
+// b = sentenceToPositionMapper(12.5);
 
-svg.selectAll("circle")
-	.data(dataset)
-	.transition()
-	.duration(2000)
-	.attr("cx", function(d) {
-	return xScale(d[0]);
-	})
-	.attr("cy", function(d) {
-		return yScale(d[1]);
-	})
-	.attr("fill", function(d){
-	col = circleColourScale(d[2]);
-	return d3.rgb(col,255-col,255);})
-	.attr("r",function(d) {
-		return circleScale(d[2]);
-	})
+// c = b-a;
 
 
+// var allData = [];
+// 	allData = [[data[gl].offencesRanges[0].bottom,
+// 	data[gl].offencesRanges[data[gl].offencesRanges.length-1].top]];
+
+	
+
+var glsOverall = svg.selectAll("overallGuidelines")
+					.data(data)
+					.enter()
+					.append("rect")
+					.attr("x", function(d) {
+						return sentenceToPositionMapper(d.offencesRanges[0].bottom,0);
+					})
+					.attr("width", function(d){
+						return sentenceToPositionMapper(d.offencesRanges[d.offencesRanges.length-1].top,0) - sentenceToPositionMapper(d.offencesRanges[0].bottom,0);
+					})
+					.attr("y", function(d,i) {
+						return i*glSpacing;
+					})
+					.attr("height", function(d,i){
+						return (d.offencesRanges.length)*glHeight;
+					})
+					.attr("fill", "#A07AEF");
+
+
+for (var gl = 0; gl < data.length; gl++) {
+
+
+	var gls = svg.selectAll("rectangle")
+		.data(data[gl].offencesRanges)
+		.enter()
+		.append("rect")
+		.attr("x", function(d) {
+			return sentenceToPositionMapper(d.bottom,0);
+			})
+		.attr("width", function(d){
+			return sentenceToPositionMapper(d.top,1) -sentenceToPositionMapper(d.bottom,0);
+			})
+		.attr("y",function(d,i) {
+			return i*glHeight +gl*glSpacing;
+			})
+		.attr("height",glHeight);
+
+	//Need to do some sort of colour interpolation on data[gl].color;
 
 
 
 
+	
+};
 
 
-});

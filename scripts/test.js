@@ -31,14 +31,14 @@ var data = [
 		top: 51/52
 		},
 		{
-		name: "Category 1"
+		name: "Category 1",
 		bottom: 1,
 		startingpoint: 1.5,
 		top: 3
 		}]
 	},
 	{offenceName: "GBH with intent",
-	colour: "#0072c1",
+	colour: "#AC8A15",
 	offencesRanges: [
 		{bottom: 3,
 		startingpoint: 4,
@@ -51,7 +51,12 @@ var data = [
 		{bottom: 9,
 		startingpoint: 12,
 		top: 16
-		}]
+		},
+		{bottom: 12,
+		startingpoint: 15,
+		top: 20
+		},
+		]
 	}
 
 
@@ -210,7 +215,10 @@ var glsOverall = svg.selectAll("overallGuidelines")
 					.attr("height", function(d,i){
 						return (d.offencesRanges.length)*glHeight;
 					})
-					.attr("fill", "#A07AEF");
+					.attr("fill", function(d) {
+						return d.colour;
+					})
+					.attr("opacity", 0.15);
 
 
 for (var gl = 0; gl < data.length; gl++) {
@@ -229,9 +237,52 @@ for (var gl = 0; gl < data.length; gl++) {
 		.attr("y",function(d,i) {
 			return i*glHeight +gl*glSpacing;
 			})
-		.attr("height",glHeight);
+		.attr("height",glHeight)
+		.attr("fill",function(d,i){
+
+			var lightnessScale = d3.scale.linear()
+							.domain([0,data[gl].offencesRanges.length-1])
+							.range([0.1,0.6]);
+
+			col = d3.hsl(data[gl].colour);
+			col.l = lightnessScale(i);
+
+			return col;
+
+		});
+
+
+	
+
+
 
 	//Need to do some sort of colour interpolation on data[gl].color;
+
+// 	myc1 = d3.hsl("#0072c1");
+// 	myc1.l = 0.2;
+// 	myc2 = d3.hsl("#0072c1");
+// 	myc2.l = 0.5;
+// 	myc3 = d3.hsl("#0072c1");
+// 	myc3.l = 0.7;
+
+// 	svg.append("circle")
+// 		.attr("cx",100)
+// 		.attr("cy",100)
+// 		.attr("r",50)
+// 		.attr("fill",myc1)
+
+// svg.append("circle")
+// 		.attr("cx",200)
+// 		.attr("cy",200)
+// 		.attr("r",50)
+// 		.attr("fill",myc2)
+
+// 		svg.append("circle")
+// 		.attr("cx",300)
+// 		.attr("cy",300)
+// 		.attr("r",50)
+// 		.attr("fill",myc3)
+	
 
 
 

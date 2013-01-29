@@ -58,20 +58,18 @@ var data = [
 		},
 		]
 	}
+];
 
 
-
-
-	];
-
-
-var disposalWidth = 300+padding;
-var custodyWidth = 150;
+var disposalWidth = 350+padding;
+var custodyWidth = 100;
 
 var bottomAxisPosition = 500;
 
 var glHeight = 10;
 var glSpacing = 50;
+
+var transitionDuration = 3000;
 
 
 
@@ -90,7 +88,7 @@ var disposalScale = d3.scale.ordinal()
 //disposalScale("Community Order") -> 80
 //disposalScale.rangeBand() -> 40
 
-var disposalAxis = d3.svg.axis().scale(disposalScale);
+var disposalAxis = d3.svg.axis().scale(disposalScale).ticks(0).tickSize(0);
 
 svg.append("g")
 	.attr("class", "axes");
@@ -108,7 +106,7 @@ var custodyScale01 = d3.scale.linear()
 						.domain([0,1])
 						.range([maxDisposal,maxCust01]);
 
-var custodyScaleAxis01 = d3.svg.axis().scale(custodyScale01).ticks(2);
+var custodyScaleAxis01 = d3.svg.axis().scale(custodyScale01).ticks(2).tickSubdivide(1).tickPadding(3);;
 
 svg.select(".axes").append("g")
 	.attr("class", "axis")
@@ -130,13 +128,43 @@ for (var i = 0; i < 5; i++) {
 							.domain([domainMin,domainMax])
 							.range([min,max]);
 
-	custodyScaleAxes[i] = d3.svg.axis().scale(custodyScales[i]).ticks((i)*2);
+	custodyScaleAxes[i] = d3.svg.axis()
+							.scale(custodyScales[i])
+							.ticks((i)*2)
+							.tickSubdivide(1)
+							.tickPadding(3);
 
 	svg.select(".axes").append("g")
 		.attr("class", "axis")
 		.call(custodyScaleAxes[i]);
 	
 }
+
+//Grid Lines
+
+gridData = [];
+
+gridData.push(sentenceToPositionMapper("Discharge",0));
+gridData.push(sentenceToPositionMapper("Fine",0));
+gridData.push(sentenceToPositionMapper("Community Order",0));
+gridData.push(sentenceToPositionMapper(0));
+
+for (var i = 0; i < 6; i++) {
+	gridData.push(sentenceToPositionMapper(Math.pow(2,i)));
+};
+
+svg.selectAll("gridLines")
+	.data(gridData)
+	.enter()
+	.append("line")
+	.attr("x1",function(d){return d;})
+	.attr("x2",function(d){return d;})
+	.attr("y1",0)
+	.attr("y2",500)
+	.attr("class","gridLines");
+
+
+
 
 
 /////////////////////////////////////////////////
@@ -146,7 +174,7 @@ for (var i = 0; i < 5; i++) {
 svg.select(".axes")
 .attr("transform", "translate(0," + bottomAxisPosition + ")");
 
-var sentenceToPositionMapper = function(sentence, topOrBottom) {
+function sentenceToPositionMapper(sentence, topOrBottom) {
 
 	var returnVal;
 
@@ -176,7 +204,7 @@ var sentenceToPositionMapper = function(sentence, topOrBottom) {
 };
 
 
-var inDomain = function(num,arr) {
+function inDomain(num,arr) {
 
 	if (num>=arr[0] & num<= arr[1]) {
 		return true;
@@ -187,22 +215,14 @@ var inDomain = function(num,arr) {
 
 }
 
-// a = sentenceToPositionMapper(0);
-// b = sentenceToPositionMapper(12.5);
-
-// c = b-a;
 
 
-// var allData = [];
-// 	allData = [[data[gl].offencesRanges[0].bottom,
-// 	data[gl].offencesRanges[data[gl].offencesRanges.length-1].top]];
-
-	
 
 var glsOverall = svg.selectAll("overallGuidelines")
 					.data(data)
 					.enter()
 					.append("rect")
+					.attr("class","overallGuidelines")
 					.attr("x", function(d) {
 						return sentenceToPositionMapper(d.offencesRanges[0].bottom,0);
 					})
@@ -224,10 +244,11 @@ var glsOverall = svg.selectAll("overallGuidelines")
 for (var gl = 0; gl < data.length; gl++) {
 
 
-	var gls = svg.selectAll("rectangle")
+	var gls = svg.selectAll("rectangle"+gl)
 		.data(data[gl].offencesRanges)
 		.enter()
 		.append("rect")
+		.attr("class", "rectangle"+gl)
 		.attr("x", function(d) {
 			return sentenceToPositionMapper(d.bottom,0);
 			})
@@ -251,43 +272,165 @@ for (var gl = 0; gl < data.length; gl++) {
 
 		});
 
-
-	
-
-
-
-	//Need to do some sort of colour interpolation on data[gl].color;
-
-// 	myc1 = d3.hsl("#0072c1");
-// 	myc1.l = 0.2;
-// 	myc2 = d3.hsl("#0072c1");
-// 	myc2.l = 0.5;
-// 	myc3 = d3.hsl("#0072c1");
-// 	myc3.l = 0.7;
-
-// 	svg.append("circle")
-// 		.attr("cx",100)
-// 		.attr("cy",100)
-// 		.attr("r",50)
-// 		.attr("fill",myc1)
-
-// svg.append("circle")
-// 		.attr("cx",200)
-// 		.attr("cy",200)
-// 		.attr("r",50)
-// 		.attr("fill",myc2)
-
-// 		svg.append("circle")
-// 		.attr("cx",300)
-// 		.attr("cy",300)
-// 		.attr("r",50)
-// 		.attr("fill",myc3)
-	
-
-
-
-
 	
 };
 
+
+
+
+
+
+
+//Respond to the click event
+d3.select("svg").on("click", function() {
+
+	var data = [
+	{offenceName: "ABH",
+	colour: "#C10000",
+	offencesRanges: [
+		{
+		name: "Category 3",
+		bottom: "Discharge",
+		startingpoint: "Fine",
+		top: "Fine"
+		},
+		{
+		name: "Category 2",
+		bottom: "Fine",
+		startingpoint: "Fine",
+		top: "Community Order"
+		},
+		{
+		name: "Category 1",
+		bottom: "Community Order",
+		startingpoint: 1.5,
+		top: 3
+		},
+		{
+		name: "Category 0",
+		bottom: 3,
+		startingpoint: 3,
+		top: 10
+		}
+		]
+	},
+	{offenceName: "GBH with intent",
+	colour: "#0C0CB6",
+	offencesRanges: [
+		{bottom: "Fine",
+		startingpoint: 4,
+		top: 5
+		},
+		{bottom: 5,
+		startingpoint: 6,
+		top: 9
+		},
+		{bottom: 9,
+		startingpoint: 12,
+		top: 16
+		},
+		{bottom: 12,
+		startingpoint: 15,
+		top: 20
+		}
+		]
+	}
+	];
+
+
+
+
+	var glsOverall = svg.selectAll(".overallGuidelines")
+					.data(data)
+					.transition()
+					.duration(transitionDuration)
+					.attr("x", function(d) {
+						return sentenceToPositionMapper(d.offencesRanges[0].bottom,0);
+					})
+					.attr("width", function(d){
+						return sentenceToPositionMapper(d.offencesRanges[d.offencesRanges.length-1].top,0) - sentenceToPositionMapper(d.offencesRanges[0].bottom,0);
+					})
+					.attr("y", function(d,i) {
+						return i*glSpacing;
+					})
+					.attr("height", function(d,i){
+						return (d.offencesRanges.length)*glHeight;
+					})
+					.attr("fill", function(d) {
+						return d.colour;
+					})
+					.attr("opacity", 0.15);
+
+
+
+
+
+	for (var gl = 0; gl < data.length; gl++) {
+
+
+		var thisone = svg.selectAll(".rectangle"+gl)
+			.data(data[gl].offencesRanges);
+
+		thisone
+			.transition()
+			.duration(transitionDuration)
+			.attr("x", function(d) {
+				return sentenceToPositionMapper(d.bottom,0);
+			})
+			.attr("width", function(d){
+				return sentenceToPositionMapper(d.top,1) -sentenceToPositionMapper(d.bottom,0);
+			})
+			.attr("y",function(d,i) {
+				return i*glHeight +gl*glSpacing;
+			})
+			.attr("height",glHeight)
+			.attr("fill",function(d,i){
+
+			var lightnessScale = d3.scale.linear()
+							.domain([0,data[gl].offencesRanges.length-1])
+							.range([0.1,0.6]);
+
+			col = d3.hsl(data[gl].colour);
+			col.l = lightnessScale(i);
+
+			return col;
+
+		});
+
+
+	thisone
+		.enter()
+		.append("rect")
+		.attr("x", function(d) {
+		return sentenceToPositionMapper(d.bottom,0);
+		})
+	.attr("width", 0)
+	.attr("y",function(d,i) {
+		return i*glHeight +gl*glSpacing;
+		})
+	.attr("height",glHeight)
+	.attr("fill",function(d,i){
+
+		var lightnessScale = d3.scale.linear()
+						.domain([0,data[gl].offencesRanges.length-1])
+						.range([0.1,0.6]);
+
+		col = d3.hsl(data[gl].colour);
+		col.l = lightnessScale(i);
+
+		return col;
+
+	})
+	.transition()
+      .duration(transitionDuration)
+      .attr("width", function(d){
+		return sentenceToPositionMapper(d.top,1) -sentenceToPositionMapper(d.bottom,0);
+		})
+
+
+
+			
+	};
+
+});
 

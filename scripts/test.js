@@ -15,14 +15,50 @@ h = svg[0][0]["clientHeight"];
 
 //JSON data containing starting points and ranges
 var data = [
+	{offenceName: "GBH with intent",
+	colour: "#0072c1",
+	offencesRanges: [
+		
+		
+		{bottom: 9,
+		startingpoint: 12,
+		top: 16
+		},
+		{bottom: 5,
+		startingpoint: 6,
+		top: 9
+		},
+		{bottom: 3,
+		startingpoint: 4,
+		top: 5
+		}
+		]
+	},
+	{offenceName: "GBH",
+	colour: "#0072c1",
+	offencesRanges: [
+		{bottom: 2.5,
+		startingpoint: 3,
+		top: 4
+		},
+		{bottom: 1,
+		startingpoint: 1.5,
+		top: 3
+		},
+		{bottom: "Community Order",
+		startingpoint: "Community Order",
+		top: 51/52
+		}
+		]
+	},
 	{offenceName: "ABH",
 	colour: "#0072c1",
 	offencesRanges: [
 		{
-		name: "Category 3",
-		bottom: "Fine",
-		startingpoint: "Community Order",
-		top: "Community Order"
+		name: "Category 1",
+		bottom: 1,
+		startingpoint: 1.5,
+		top: 3
 		},
 		{
 		name: "Category 2",
@@ -31,33 +67,83 @@ var data = [
 		top: 51/52
 		},
 		{
-		name: "Category 1",
-		bottom: 1,
-		startingpoint: 1.5,
-		top: 3
-		}]
+		name: "Category 3",
+		bottom: "Fine",
+		startingpoint: "Community Order",
+		top: "Community Order"
+		}
+		]
 	},
-	{offenceName: "GBH with intent",
-	colour: "#AC8A15",
+	{offenceName: "Assault with intent to resist arrest",
+	colour: "#0072c1",
 	offencesRanges: [
-		{bottom: 3,
-		startingpoint: 4,
-		top: 5
+		{
+		name: "Category 1",
+		bottom: 12/52,
+		startingpoint: 0.5,
+		top: 51/52
 		},
-		{bottom: 5,
-		startingpoint: 6,
-		top: 9
+		{
+		name: "Category 2",
+		bottom: "Community Order",
+		startingpoint: "Community Order",
+		top: "Community Order"
 		},
-		{bottom: 9,
-		startingpoint: 12,
-		top: 16
+		{
+		name: "Category 3",
+		bottom: "Fine",
+		startingpoint: "Fine",
+		top: "Fine"
+		}
+		]
+	},
+	{offenceName: "Assault on a police constable in execution of his duty",
+	colour: "#0072c1",
+	offencesRanges: [
+		{
+		name: "Category 1",
+		bottom: "Community Order",
+		startingpoint: 12/52,
+		top: 0.5
 		},
-		{bottom: 12,
-		startingpoint: 15,
-		top: 20
+		{
+		name: "Category 2",
+		bottom: "Community Order",
+		startingpoint: "Community Order",
+		top: "Community Order"
 		},
+		{
+		name: "Category 3",
+		bottom: "Fine",
+		startingpoint: "Fine",
+		top: "Fine"
+		}
+		]
+	},
+	{offenceName: "Common Assault",
+	colour: "#0072c1",
+	offencesRanges: [
+		{
+		name: "Category 1",
+		bottom: "Community Order",
+		startingpoint: 12/52,
+		top: 0.5
+		},
+		{
+		name: "Category 2",
+		bottom: "Fine",
+		startingpoint: "Community Order",
+		top: "Community Order"
+		},
+		{
+		name: "Category 3",
+		bottom: "Discharge",
+		startingpoint: "Fine",
+		top: "Fine"
+		}
 		]
 	}
+	
 ];
 
 
@@ -69,7 +155,7 @@ var bottomAxisPosition = 500;
 var glHeight = 10;
 var glSpacing = 50;
 
-var transitionDuration = 3000;
+var transitionDuration = 5000;
 
 
 
@@ -224,10 +310,10 @@ var glsOverall = svg.selectAll("overallGuidelines")
 					.append("rect")
 					.attr("class","overallGuidelines")
 					.attr("x", function(d) {
-						return sentenceToPositionMapper(d.offencesRanges[0].bottom,0);
+						return sentenceToPositionMapper(d.offencesRanges[d.offencesRanges.length-1].bottom,0);
 					})
 					.attr("width", function(d){
-						return sentenceToPositionMapper(d.offencesRanges[d.offencesRanges.length-1].top,0) - sentenceToPositionMapper(d.offencesRanges[0].bottom,0);
+						return (sentenceToPositionMapper(d.offencesRanges[0].top,0)- sentenceToPositionMapper(d.offencesRanges[d.offencesRanges.length-1].bottom,0));
 					})
 					.attr("y", function(d,i) {
 						return i*glSpacing;
@@ -285,54 +371,64 @@ for (var gl = 0; gl < data.length; gl++) {
 d3.select("svg").on("click", function() {
 
 	var data = [
-	{offenceName: "ABH",
-	colour: "#C10000",
+	{offenceName: "Aggravated burglary",
+	colour: "#4AAB2E",
 	offencesRanges: [
 		{
-		name: "Category 3",
-		bottom: "Discharge",
-		startingpoint: "Fine",
-		top: "Fine"
+		name: "Category 1",
+		bottom: 9,
+		startingpoint: 10,
+		top: 13
 		},
 		{
 		name: "Category 2",
-		bottom: "Fine",
-		startingpoint: "Fine",
-		top: "Community Order"
-		},
-		{
-		name: "Category 1",
-		bottom: "Community Order",
-		startingpoint: 1.5,
-		top: 3
-		},
-		{
-		name: "Category 0",
-		bottom: 3,
-		startingpoint: 3,
-		top: 10
-		}
-		]
-	},
-	{offenceName: "GBH with intent",
-	colour: "#0C0CB6",
-	offencesRanges: [
-		{bottom: "Fine",
-		startingpoint: 4,
-		top: 5
-		},
-		{bottom: 5,
+		bottom: 4,
 		startingpoint: 6,
 		top: 9
 		},
-		{bottom: 9,
-		startingpoint: 12,
-		top: 16
-		},
-		{bottom: 12,
-		startingpoint: 15,
-		top: 20
+		{
+		name: "Category 3",
+		bottom: 1,
+		startingpoint: 2,
+		top: 4
 		}
+		
+		]
+	},
+	{offenceName: "Domestic burglary",
+	colour: "#4AAB2E",
+	offencesRanges: [
+		{bottom: 2,
+		startingpoint: 3,
+		top: 6
+		},
+		{bottom: "Community Order",
+		startingpoint: 1,
+		top: 2
+		},
+		{bottom: "Community Order",
+		startingpoint: "Community Order",
+		top: 0.5
+		}
+	
+		]
+	},
+	{offenceName: "Non-domestic burglary",
+	colour: "#4AAB2E",
+	offencesRanges: [
+		{bottom: 1,
+		startingpoint: 2,
+		top: 5
+		},
+		{bottom: "Community Order",
+		startingpoint: 18/52,
+		top: 51/52
+		},
+		{bottom: "Fine",
+		startingpoint: "Community Order",
+		top: 18/52
+		}
+	
 		]
 	}
 	];
@@ -342,8 +438,29 @@ d3.select("svg").on("click", function() {
 
 	var glsOverall = svg.selectAll(".overallGuidelines")
 					.data(data)
-					.transition()
-					.duration(transitionDuration)
+
+	glsOverall.transition()
+				.duration(transitionDuration)
+				.attr("x", function(d) {
+						return sentenceToPositionMapper(d.offencesRanges[d.offencesRanges.length-1].bottom,0);
+					})
+					.attr("width", function(d){
+						return (sentenceToPositionMapper(d.offencesRanges[0].top,0)- sentenceToPositionMapper(d.offencesRanges[d.offencesRanges.length-1].bottom,0));
+					})
+				.attr("y", function(d,i) {
+					return i*glSpacing;
+				})
+				.attr("height", function(d,i){
+					return (d.offencesRanges.length)*glHeight;
+				})
+				.attr("fill", function(d) {
+					return d.colour;
+				})
+				.attr("opacity", 0.15);
+
+	glsOverall.enter()
+			.append("rect")
+					.attr("class","overallGuidelines")
 					.attr("x", function(d) {
 						return sentenceToPositionMapper(d.offencesRanges[0].bottom,0);
 					})
@@ -359,7 +476,22 @@ d3.select("svg").on("click", function() {
 					.attr("fill", function(d) {
 						return d.colour;
 					})
+					.attr("opacity", 0)
+					.transition()
+					.duration(transitionDuration)
 					.attr("opacity", 0.15);
+
+
+	glsOverall
+		.exit()
+		.transition()
+		.duration(transitionDuration)
+		.attr("width",0)
+		.attr("height",0)
+		.remove()
+
+
+
 
 
 
@@ -428,9 +560,31 @@ d3.select("svg").on("click", function() {
 		})
 
 
+      thisone
+		.exit()
+		.transition()
+		.duration(transitionDuration)
+		.attr("width",0)
+		.attr("height",0)
+		.remove()
+		
 
 			
 	};
+
+	d3.selectAll("rect").on("mouseover", function() {
+
+
+		if (this.__data__.offenceName) {var text = (this.__data__.offenceName)}
+		else {
+			var text = "Bottom of range: " +this.__data__.bottom + " and top of range: " + this.__data__.top
+		}
+
+		d3.select("div").text(text)
+
+
+		
+})
 
 });
 

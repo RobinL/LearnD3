@@ -1,3 +1,8 @@
+//implement a polylinear scale like this:
+// var polyscale = d3.scale.linear()
+// 	.domain([0,1,2,4,8,16])
+// 	.range([0,1,2,3,4,5]);
+
 w = window.innerWidth-25;
 h = window.innerHeight-25;
 padding = 40;
@@ -55,43 +60,17 @@ svg.select(".axes")
 maxDisposal = disposalScale.rangeExtent()[1];
 maxCust01 = maxDisposal+custodyWidth*2;
 
-var custodyScale01 = d3.scale.linear()
-						.domain([0,1])
-						.range([maxDisposal,maxCust01]);
+var custodyScale = d3.scale.linear()
+						.domain([0,1,2,4,8,16,32])
+						.range(d3.range(0+maxDisposal,700+maxDisposal,100));
 
-var custodyScaleAxis01 = d3.svg.axis().scale(custodyScale01).ticks(2).tickSubdivide(1).tickPadding(3);;
+
+var custodyScaleAxis = d3.svg.axis().scale(custodyScale).tickValues([0,1,2,3,4,6,8,10,12,14,16,20,24,28,32]);
 
 svg.select(".axes").append("g")
 	.attr("class", "axis")
-	.call(custodyScaleAxis01);
+	.call(custodyScaleAxis);
 
-
-var custodyScales=[];
-var custodyScaleAxes = [];
-
-for (var i = 0; i < 5; i++) {
-
-	var min = maxCust01 + custodyWidth*i;
-	var max = maxCust01 + custodyWidth*(i+1);
-
-	var domainMin = Math.pow(2,i);
-	var domainMax = Math.pow(2,i+1);
-
-	custodyScales[i] = d3.scale.linear()
-							.domain([domainMin,domainMax])
-							.range([min,max]);
-
-	custodyScaleAxes[i] = d3.svg.axis()
-							.scale(custodyScales[i])
-							.ticks((i)*2)
-							.tickSubdivide(1)
-							.tickPadding(3);
-
-	svg.select(".axes").append("g")
-		.attr("class", "axis")
-		.call(custodyScaleAxes[i]);
-	
-}
 
 //Grid Lines
 
@@ -116,7 +95,7 @@ svg.selectAll("gridLines")
 	.attr("y2",bottomAxisPosition)
 	.attr("class","gridLines");
 
-
+debugger;
 
 
 
@@ -144,29 +123,16 @@ function sentenceToPositionMapper(sentence, topOrBottom) {
 	}
 
 
-	if (inDomain(sentence, custodyScale01.domain())) {
-			return custodyScale01(sentence);
+	if (sentence >=0) {
+			return custodyScale(sentence);
 		}
 
-	for (var i = 0; i < 5; i++) {
-		if (inDomain(sentence, custodyScales[i].domain())) {
-			return custodyScales[i](sentence);
-		}
-	}
+	
 
 };
 
 
-function inDomain(num,arr) {
 
-	if (num>=arr[0] & num<= arr[1]) {
-		return true;
-	}
-	else {
-		return false;
-	}
-
-}
 
 
 

@@ -1,8 +1,3 @@
-//implement a polylinear scale like this:
-// var polyscale = d3.scale.linear()
-// 	.domain([0,1,2,4,8,16])
-// 	.range([0,1,2,3,4,5]);
-
 w = window.innerWidth-25;
 h = window.innerHeight-25;
 padding = 40;
@@ -30,12 +25,9 @@ var glSpacing = 50;
 var transitionDuration = 1500;
 
 
-
-
 /////////////////////////////////////////////////
 //Axes and scales
 /////////////////////////////////////////////////
-
 
 
 //An ordinal scale to cover discharge,fine,community order
@@ -43,10 +35,11 @@ var disposalScale = d3.scale.ordinal()
 						.domain(["Discharge","Fine", "Community Order"])
 						.rangeBands([padding,disposalWidth]);
 
-//disposalScale("Community Order") -> 80
-//disposalScale.rangeBand() -> 40
 
-var disposalAxis = d3.svg.axis().scale(disposalScale).ticks(0).tickSize(0);
+var disposalAxis = d3.svg.axis()
+					.scale(disposalScale)
+					.ticks(0)
+					.tickSize(0);
 
 svg.append("g")
 	.attr("class", "axes");
@@ -65,11 +58,16 @@ var custodyScale = d3.scale.linear()
 						.range(d3.range(0+maxDisposal,700+maxDisposal,100));
 
 
-var custodyScaleAxis = d3.svg.axis().scale(custodyScale).tickValues([0,1,2,3,4,6,8,10,12,14,16,20,24,28,32]);
+var custodyScaleAxis = d3.svg.axis()
+						.scale(custodyScale)
+						.tickValues([0,1,2,3,4,6,8,10,12,14,16,20,24,28,32]);
 
 svg.select(".axes").append("g")
 	.attr("class", "axis")
 	.call(custodyScaleAxis);
+
+svg.select(".axes").data([data.length*glSpacing])
+			.attr("transform", "translate(0," + data.length*glSpacing + ")");
 
 
 //Grid Lines
@@ -95,7 +93,7 @@ svg.selectAll("gridLines")
 	.attr("y2",bottomAxisPosition)
 	.attr("class","gridLines");
 
-debugger;
+
 
 
 
@@ -103,8 +101,6 @@ debugger;
 //Draw guideline ranges
 /////////////////////////////////////////////////
 
-svg.select(".axes")
-.attr("transform", "translate(0," + bottomAxisPosition + ")");
 
 function sentenceToPositionMapper(sentence, topOrBottom) {
 
@@ -133,67 +129,6 @@ function sentenceToPositionMapper(sentence, topOrBottom) {
 
 
 
-
-
-
-
-var glsOverall = svg.selectAll("overallGuidelines")
-					.data(data)
-					.enter()
-					.append("rect")
-					.attr("class","overallGuidelines")
-					.attr("x", function(d) {
-						return sentenceToPositionMapper(d.offencesRanges[d.offencesRanges.length-1].bottom,0);
-					})
-					.attr("width", function(d){
-						return (sentenceToPositionMapper(d.offencesRanges[0].top,0)- sentenceToPositionMapper(d.offencesRanges[d.offencesRanges.length-1].bottom,0));
-					})
-					.attr("y", function(d,i) {
-						return i*glSpacing;
-					})
-					.attr("height", function(d,i){
-						return (d.offencesRanges.length)*glHeight;
-					})
-					.attr("fill", function(d) {
-						return d.colour;
-					})
-					.attr("opacity", 0.15);
-
-
-for (var gl = 0; gl < data.length; gl++) {
-
-
-	var gls = svg.selectAll("rectangle"+gl)
-		.data(data[gl].offencesRanges)
-		.enter()
-		.append("rect")
-		.attr("class", "rectangle"+gl)
-		.attr("x", function(d) {
-			return sentenceToPositionMapper(d.bottom,0);
-			})
-		.attr("width", function(d){
-			return sentenceToPositionMapper(d.top,1) -sentenceToPositionMapper(d.bottom,0);
-			})
-		.attr("y",function(d,i) {
-			return i*glHeight +gl*glSpacing;
-			})
-		.attr("height",glHeight)
-		.attr("opacity",1)
-		.attr("fill",function(d,i){
-
-			var lightnessScale = d3.scale.linear()
-							.domain([0,data[gl].offencesRanges.length-1])
-							.range([0.1,0.6]);
-
-			col = d3.hsl(data[gl].colour);
-			col.l = lightnessScale(i);
-
-			return col;
-
-		});
-
-	
-};
 
 
 
@@ -352,12 +287,64 @@ d3.select("select").on("change", function(){
 		.attr("opacity",0)
 		.remove()
 	}
-		
 	}
 
 
+	var newAxesPos = data.length*glSpacing;
+	var oldAxesPos = svg.select(".axes").data()[0];
 
-d3.selectAll("rect").on("mouseover", function() {
+	if (newAxesPos > oldAxesPos) {
+		svg.select(".axes").data([data.length*glSpacing])
+			.transition()
+			.duration(transitionDuration/4)
+			.style("opacity",0)
+			.transition()
+			.duration(0)
+			.attr("transform", "translate(0," + data.length*glSpacing + ")")
+			.transition()
+			.delay(2*transitionDuration/4)
+			.duration(transitionDuration/2)
+			.style("opacity",1)
+
+
+		
+
+		svg.selectAll(".gridLines")
+			.data(gridData)
+			.transition()
+			.duration(transitionDuration/2)
+			.attr("x1",function(d){return d;})
+			.attr("x2",function(d){return d;})
+			.attr("y1",0)
+			.attr("y2",data.length*glSpacing)
+			.attr("class","gridLines");
+
+	} else {
+
+		svg.select(".axes").data([data.length*glSpacing])
+			.transition()
+			.delay(transitionDuration/3)
+			.duration(transitionDuration/2)
+			.attr("transform", "translate(0," + data.length*glSpacing + ")");
+
+		svg.selectAll(".gridLines")
+			.data(gridData)
+			.transition()
+			.delay(transitionDuration/3)
+			.duration(transitionDuration/2)
+			.attr("x1",function(d){return d;})
+			.attr("x2",function(d){return d;})
+			.attr("y1",0)
+			.attr("y2",data.length*glSpacing)
+			.attr("class","gridLines");
+	}
+
+	
+
+
+
+
+	d3.selectAll("rect").on("mouseover", function() {
 
 
 		if (this.__data__.offenceName) {var text = (this.__data__.offenceName)}
@@ -373,3 +360,4 @@ d3.selectAll("rect").on("mouseover", function() {
 
 });
 
+d3.select("select").on("change")();

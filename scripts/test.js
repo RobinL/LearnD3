@@ -190,6 +190,34 @@ d3.select("select").on("change", function(){
 					.transition()
 					.duration(transitionDuration)
 					.attr("opacity", 0.15);
+			
+	glsOverall.enter().append("text")
+			.attr("dx", function(d) {
+						return 10+sentenceToPositionMapper(d.offencesRanges[0].top,0);
+					})
+			.attr("dy", function(d,i) {
+						return i*glSpacing +20;
+					})
+			.text(function(d) {
+				return d.offenceName
+			})
+			.attr("font-family", "sans-serif")
+	   		.attr("font-size", "12px");
+
+	  glsOverall.enter().append("text")
+			.attr("dx", function(d) {
+						return 10+sentenceToPositionMapper(d.offencesRanges[0].top,0);
+					})
+			.attr("dy", function(d,i) {
+						return i*glSpacing +20;
+					})
+			.text(function(d) {
+				return d.offenceName
+			})
+			.attr("font-family", "sans-serif")
+	   		.attr("font-size", "12px")
+	   
+
 
 
 	glsOverall
@@ -346,7 +374,6 @@ d3.select("select").on("change", function(){
 
 	d3.selectAll("rect").on("mouseover", function() {
 
-
 		if (this.__data__.offenceName) {var text = (this.__data__.offenceName)}
 		else {
 			var text = "Bottom of range: " +this.__data__.bottom + " and top of range: " + this.__data__.top
@@ -354,9 +381,15 @@ d3.select("select").on("change", function(){
 
 		d3.select("div").text(text)
 
+	})
+
+	d3.selectAll("rect").on("mouseout", function() {
 
 		
-})
+
+		d3.select("div").text("- ")
+
+	})
 
 });
 

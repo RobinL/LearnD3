@@ -11,7 +11,7 @@ w = svg[0][0]["clientWidth"];
 h = svg[0][0]["clientHeight"];
 
 
-var data = JSONData.Assaults;
+var data = JSONData[0];
 
 
 var disposalWidth = 350+padding;
@@ -83,7 +83,9 @@ for (var i = 0; i < 6; i++) {
 	gridData.push(sentenceToPositionMapper(Math.pow(2,i)));
 };
 
-svg.selectAll("gridLines")
+group = svg.append("g").attr("class","gridLines");
+
+group.selectAll("gridLines")
 	.data(gridData)
 	.enter()
 	.append("line")
@@ -123,54 +125,49 @@ function sentenceToPositionMapper(sentence, topOrBottom) {
 			return custodyScale(sentence);
 		}
 
-	
-
-};
+}
 
 
-
-
-
-
-
-
-
-
-//Respond to the click event
-// d3.select("svg").on("click", function() {
 
 d3.select("select").on("change", function(){
 
+	//Get data
 	var selection = d3.select("select")[0][0].value;
-
 	data = JSONData[selection];
 
-	
-	var glsOverall = svg.selectAll(".overallGuidelines")
-					.data(data);
 
-	glsOverall.transition()
-				.duration(transitionDuration)
-				.attr("x", function(d) {
+	//Now need to do nested iterations
+
+	//gslAll will be a selection of each GROUP with class .overallGuidelines.
+	var glsAll = svg.selectAll(".overallGuidelines").data(data);
+
+
+	//we want enter, change, and exits according to the data for glAll
+
+	//You can chain append statements only if previous appends 
+	glsAll.enter()
+		.append("g")
+		.attr("class","overallGuidelines")
+		.append("rect")
+		.attr("class","overallGuidelinesRect")
+		.attr("x", function(d) {
 						return sentenceToPositionMapper(d.offencesRanges[d.offencesRanges.length-1].bottom,0);
 					})
 					.attr("width", function(d){
 						return (sentenceToPositionMapper(d.offencesRanges[0].top,0)- sentenceToPositionMapper(d.offencesRanges[d.offencesRanges.length-1].bottom,0));
 					})
-				.attr("y", function(d,i) {
-					return i*glSpacing;
-				})
-				.attr("height", function(d,i){
-					return (d.offencesRanges.length)*glHeight;
-				})
-				.attr("fill", function(d) {
-					return d.colour;
-				})
-				.attr("opacity", 0.15);
+					.attr("y", function(d,i) {
+						return i*glSpacing;
+					})
+					.attr("height", function(d,i){
+						return (d.offencesRanges.length)*glHeight;
+					})
+					.attr("fill", function(d) {
+						return d.colour;
+					})
+					.attr("opacity", 0.15);
 
-	glsOverall.enter()
-			.append("rect")
-					.attr("class","overallGuidelines")
+	glsAll.select(".overallGuidelinesRect")
 					.attr("x", function(d) {
 						return sentenceToPositionMapper(d.offencesRanges[d.offencesRanges.length-1].bottom,0);
 					})
@@ -186,211 +183,332 @@ d3.select("select").on("change", function(){
 					.attr("fill", function(d) {
 						return d.colour;
 					})
-					.attr("opacity", 0)
-					.transition()
-					.duration(transitionDuration)
 					.attr("opacity", 0.15);
-			
-	glsOverall.enter().append("text")
-			.attr("dx", function(d) {
-						return 10+sentenceToPositionMapper(d.offencesRanges[0].top,0);
+
+	
+
+	glsAll.exit().remove();
+
+
+
+
+	function cross(a) {
+		return function(d) {
+			b = d[a]
+			var c = [];
+			for(var i = 0, n = b.length; i < n; i++) c.push({
+				gl: d,
+				cat: b[i]
+			});
+			return c;
+		};
+	}
+
+
+
+	//Enter for guidelines
+	glsAll.selectAll("rect2")
+					.data(cross("offencesRanges"))
+					.enter()
+					.append("rect")
+					.attr("class", "categoryRangeRect")
+					.attr("x", function(d,i) {
+						return sentenceToPositionMapper(d.cat.bottom,0);
 					})
-			.attr("dy", function(d,i) {
-						return i*glSpacing +20;
+					.attr("width", function(d){
+						return (sentenceToPositionMapper(d.cat.top,1)- sentenceToPositionMapper(d.cat.bottom,0));
 					})
-			.text(function(d) {
-				return d.offenceName
-			})
-			.attr("font-family", "sans-serif")
-	   		.attr("font-size", "12px");
-
-	  glsOverall.enter().append("text")
-			.attr("dx", function(d) {
-						return 10+sentenceToPositionMapper(d.offencesRanges[0].top,0);
+					.attr("y",function(d,i,j) {
+										
+						return j*glSpacing+i*10;
 					})
-			.attr("dy", function(d,i) {
-						return i*glSpacing +20;
+					.attr("height",function(d,i){
+						return glHeight;
 					})
-			.text(function(d) {
-				return d.offenceName
-			})
-			.attr("font-family", "sans-serif")
-	   		.attr("font-size", "12px")
-	   
+					.attr("fill",function(d,i){
 
-
-
-	glsOverall
-		.exit()
-		.transition()
-		.duration(transitionDuration/3)
-		.attr("opacity",0)
-		.remove();
-
-
-
-
-	for (var gl = 0; gl < data.length; gl++) {
-
-
-		var thisone = svg.selectAll(".rectangle"+gl)
-			.data(data[gl].offencesRanges);
-		
-		thisone
-			.transition()
-			.duration(transitionDuration)
-			.attr("x", function(d) {
-				return sentenceToPositionMapper(d.bottom,0);
-			})
-			.attr("width", function(d){
-				return sentenceToPositionMapper(d.top,1) -sentenceToPositionMapper(d.bottom,0);
-			})
-			.attr("y",function(d,i) {
-				return i*glHeight +gl*glSpacing;
-			})
-			.attr("height",glHeight)
-			.attr("fill",function(d,i){
-
-			var lightnessScale = d3.scale.linear()
-							.domain([0,data[gl].offencesRanges.length-1])
+						var lightnessScale = d3.scale.linear()
+							.domain([0,d.gl.offencesRanges.length-1])
 							.range([0.1,0.6]);
 
-			col = d3.hsl(data[gl].colour);
-			col.l = lightnessScale(i);
+						col = d3.hsl(d.gl.colour);
+						col.l = lightnessScale(i);
 
-			return col;
+					return col;
 
-		});
+					});
+	
+
+	//Change for guidelines
+	glsAll.selectAll(".categoryRangeRect")
+					.data(cross("offencesRanges"))
+					.attr("class", "categoryRangeRect")
+					.attr("x", function(d,i) {
+						return sentenceToPositionMapper(d.cat.bottom,0);
+					})
+					.attr("width", function(d){
+						return (sentenceToPositionMapper(d.cat.top,1)- sentenceToPositionMapper(d.cat.bottom,0));
+					})
+					.attr("y",function(d,i,j) {
+										
+						return j*glSpacing+i*10;
+					})
+					.attr("height",function(d,i){
+						return glHeight;
+					})
+					.attr("fill",function(d,i){
+
+						var lightnessScale = d3.scale.linear()
+							.domain([0,d.gl.offencesRanges.length-1])
+							.range([0.1,0.6]);
+
+						col = d3.hsl(d.gl.colour);
+						col.l = lightnessScale(i);
+
+					return col;
+
+					});
+
+		glsAll.selectAll(".categoryRangeRect")
+					.data(cross("offencesRanges"))
+					.exit()
+					.remove();
+					
 
 
-	thisone
-		.enter()
-		.append("rect")
-		.attr("class", "rectangle"+gl)
-		.attr("x", function(d) {
-		return sentenceToPositionMapper(d.bottom,0);
-		})
-	.attr("width", 0)
-	.attr("y",function(d,i) {
-		return i*glHeight +gl*glSpacing;
-		})
-	.attr("height",glHeight)
-	.attr("fill",function(d,i){
-
-		var lightnessScale = d3.scale.linear()
-						.domain([0,data[gl].offencesRanges.length-1])
-						.range([0.1,0.6]);
-
-		col = d3.hsl(data[gl].colour);
-		col.l = lightnessScale(i);
-
-		return col;
-
-	})
-	.transition()
-      .duration(transitionDuration)
-      .attr("width", function(d){
-		return sentenceToPositionMapper(d.top,1) -sentenceToPositionMapper(d.bottom,0);
-		})
 
 
-      thisone
-		.exit()
-		.transition()
-		.duration(transitionDuration)
-		.attr("width",0)
-		.attr("height",0)
-		.remove()
+					
+
+	myvar = d3.selectAll(".offenceRanges");
+
+					
+
+      
 		
 			
-	};
+	
 
 
-	for (var gl = 0; gl < data.length+10; gl++) {
-
-		if (!data[gl]) {
-		var thisone = svg.selectAll(".rectangle"+gl)
-		.transition()
-		.duration(transitionDuration/3)
-		.attr("opacity",0)
-		.remove()
-	}
-	}
 
 
-	var newAxesPos = data.length*glSpacing;
-	var oldAxesPos = svg.select(".axes").data()[0];
+});
 
-	if (newAxesPos > oldAxesPos) {
-		svg.select(".axes").data([data.length*glSpacing])
-			.transition()
-			.duration(transitionDuration/4)
-			.style("opacity",0)
-			.transition()
-			.duration(0)
-			.attr("transform", "translate(0," + data.length*glSpacing + ")")
-			.transition()
-			.delay(2*transitionDuration/4)
-			.duration(transitionDuration/2)
-			.style("opacity",1)
+d3.select("select").on("change")();
+
+
+
+
+
+
+
+// d3.select("select").on("change", function(){
+
+// 	var selection = d3.select("select")[0][0].value;
+
+// 	data = JSONData[selection];
+
+	
+// 	var glsOverall = svg.selectAll(".overallGuidelines")
+// 					.data(data);
+
+// 	glsOverall.transition()
+// 				.duration(transitionDuration)
+// 				.attr("x", function(d) {
+// 						return sentenceToPositionMapper(d.offencesRanges[d.offencesRanges.length-1].bottom,0);
+// 					})
+// 					.attr("width", function(d){
+// 						return (sentenceToPositionMapper(d.offencesRanges[0].top,0)- sentenceToPositionMapper(d.offencesRanges[d.offencesRanges.length-1].bottom,0));
+// 					})
+// 				.attr("y", function(d,i) {
+// 					return i*glSpacing;
+// 				})
+// 				.attr("height", function(d,i){
+// 					return (d.offencesRanges.length)*glHeight;
+// 				})
+// 				.attr("fill", function(d) {
+// 					return d.colour;
+// 				})
+// 				.attr("opacity", 0.15);
+
+// 	glsOverall.enter()
+// 			.append("rect")
+// 					.attr("class","overallGuidelines")
+// 					.attr("x", function(d) {
+// 						return sentenceToPositionMapper(d.offencesRanges[d.offencesRanges.length-1].bottom,0);
+// 					})
+// 					.attr("width", function(d){
+// 						return (sentenceToPositionMapper(d.offencesRanges[0].top,0)- sentenceToPositionMapper(d.offencesRanges[d.offencesRanges.length-1].bottom,0));
+// 					})
+// 					.attr("y", function(d,i) {
+// 						return i*glSpacing;
+// 					})
+// 					.attr("height", function(d,i){
+// 						return (d.offencesRanges.length)*glHeight;
+// 					})
+// 					.attr("fill", function(d) {
+// 						return d.colour;
+// 					})
+// 					.attr("opacity", 0)
+// 					.transition()
+// 					.duration(transitionDuration)
+// 					.attr("opacity", 0.15);
+			
+
+
+
+
+// 	glsOverall
+// 		.exit()
+// 		.transition()
+// 		.duration(transitionDuration/3)
+// 		.attr("opacity",0)
+// 		.remove();
+
+
+
+
+// 	for (var gl = 0; gl < data.length; gl++) {
+
+
+// 		var thisone = svg.selectAll(".rectangle"+gl)
+// 			.data(data[gl].offencesRanges);
+		
+// 		thisone
+// 			.transition()
+// 			.duration(transitionDuration)
+// 			.attr("x", function(d) {
+// 				return sentenceToPositionMapper(d.bottom,0);
+// 			})
+// 			.attr("width", function(d){
+// 				return sentenceToPositionMapper(d.top,1) -sentenceToPositionMapper(d.bottom,0);
+// 			})
+// 			.attr("y",function(d,i) {
+// 				return i*glHeight +gl*glSpacing;
+// 			})
+// 			.attr("height",glHeight)
+// 			.attr("fill",function(d,i){
+
+// 			var lightnessScale = d3.scale.linear()
+// 							.domain([0,data[gl].offencesRanges.length-1])
+// 							.range([0.1,0.6]);
+
+// 			col = d3.hsl(data[gl].colour);
+// 			col.l = lightnessScale(i);
+
+// 			return col;
+
+// 		});
+
+
+// 	thisone
+// 		.enter()
+// 		.append("rect")
+// 		.attr("class", "rectangle"+gl)
+// 		.attr("x", function(d) {
+// 		return sentenceToPositionMapper(d.bottom,0);
+// 		})
+// 	.attr("width", 0)
+// 	.attr("y",function(d,i) {
+// 		return i*glHeight +gl*glSpacing;
+// 		})
+// 	.attr("height",glHeight)
+// 	.attr("fill",function(d,i){
+
+// 		var lightnessScale = d3.scale.linear()
+// 						.domain([0,data[gl].offencesRanges.length-1])
+// 						.range([0.1,0.6]);
+
+// 		col = d3.hsl(data[gl].colour);
+// 		col.l = lightnessScale(i);
+
+// 		return col;
+
+// 	})
+// 	.transition()
+//       .duration(transitionDuration)
+//       .attr("width", function(d){
+// 		return sentenceToPositionMapper(d.top,1) -sentenceToPositionMapper(d.bottom,0);
+// 		})
+
+
+//       thisone
+// 		.exit()
+// 		.transition()
+// 		.duration(transitionDuration)
+// 		.attr("width",0)
+// 		.attr("height",0)
+// 		.remove()
+		
+			
+// 	};
+
+
+// 	for (var gl = 0; gl < data.length+10; gl++) {
+
+// 		if (!data[gl]) {
+// 		var thisone = svg.selectAll(".rectangle"+gl)
+// 		.transition()
+// 		.duration(transitionDuration/3)
+// 		.attr("opacity",0)
+// 		.remove()
+// 	}
+// 	}
+
+
+// 	var newAxesPos = data.length*glSpacing;
+// 	var oldAxesPos = svg.select(".axes").data()[0];
+
+// 	if (newAxesPos > oldAxesPos) {
+// 		svg.select(".axes").data([data.length*glSpacing])
+// 			.transition()
+// 			.duration(transitionDuration/4)
+// 			.style("opacity",0)
+// 			.transition()
+// 			.duration(0)
+// 			.attr("transform", "translate(0," + data.length*glSpacing + ")")
+// 			.transition()
+// 			.delay(2*transitionDuration/4)
+// 			.duration(transitionDuration/2)
+// 			.style("opacity",1)
 
 
 		
 
-		svg.selectAll(".gridLines")
-			.data(gridData)
-			.transition()
-			.duration(transitionDuration/2)
-			.attr("x1",function(d){return d;})
-			.attr("x2",function(d){return d;})
-			.attr("y1",0)
-			.attr("y2",data.length*glSpacing)
-			.attr("class","gridLines");
+// 		svg.selectAll(".gridLines")
+// 			.data(gridData)
+// 			.transition()
+// 			.duration(transitionDuration/2)
+// 			.attr("x1",function(d){return d;})
+// 			.attr("x2",function(d){return d;})
+// 			.attr("y1",0)
+// 			.attr("y2",data.length*glSpacing)
+// 			.attr("class","gridLines");
 
-	} else {
+// 	} else {
 
-		svg.select(".axes").data([data.length*glSpacing])
-			.transition()
-			.delay(transitionDuration/3)
-			.duration(transitionDuration/2)
-			.attr("transform", "translate(0," + data.length*glSpacing + ")");
+// 		svg.select(".axes").data([data.length*glSpacing])
+// 			.transition()
+// 			.delay(transitionDuration/3)
+// 			.duration(transitionDuration/2)
+// 			.attr("transform", "translate(0," + data.length*glSpacing + ")");
 
-		svg.selectAll(".gridLines")
-			.data(gridData)
-			.transition()
-			.delay(transitionDuration/3)
-			.duration(transitionDuration/2)
-			.attr("x1",function(d){return d;})
-			.attr("x2",function(d){return d;})
-			.attr("y1",0)
-			.attr("y2",data.length*glSpacing)
-			.attr("class","gridLines");
-	}
+// 		svg.selectAll(".gridLines")
+// 			.data(gridData)
+// 			.transition()
+// 			.delay(transitionDuration/3)
+// 			.duration(transitionDuration/2)
+// 			.attr("x1",function(d){return d;})
+// 			.attr("x2",function(d){return d;})
+// 			.attr("y1",0)
+// 			.attr("y2",data.length*glSpacing)
+// 			.attr("class","gridLines");
+// 	}
 
 	
 
 
 
 
-	d3.selectAll("rect").on("mouseover", function() {
+// });
 
-		if (this.__data__.offenceName) {var text = (this.__data__.offenceName)}
-		else {
-			var text = "Bottom of range: " +this.__data__.bottom + " and top of range: " + this.__data__.top
-		}
-
-		d3.select("div").text(text)
-
-	})
-
-	d3.selectAll("rect").on("mouseout", function() {
-
-		
-
-		d3.select("div").text("- ")
-
-	})
-
-});
-
-d3.select("select").on("change")();

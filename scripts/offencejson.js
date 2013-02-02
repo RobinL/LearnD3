@@ -1,8 +1,8 @@
 //JSON data containing starting points and ranges
 
 
-var JSONData = {
-	Assaults: [
+var JSONData = [
+	[
 		{offenceName: "GBH with intent",
 		colour: "#0072c1",
 		offencesRanges: [
@@ -131,7 +131,7 @@ var JSONData = {
 		}
 	]
 	,
-	Burglary: 
+	
 	[{
 	offenceName: "Aggravated burglary",
 	colour: "#4AAB2E",
@@ -194,5 +194,5 @@ var JSONData = {
 		]
 	}
 	]
-};
+];
 

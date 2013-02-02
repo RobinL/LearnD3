@@ -1,9 +1,9 @@
-.disposalAxis, .axis path,
-.disposalAxis, .axis line {
+.disposalAxis, .axis path, .disposalAxis, .axis line {
 fill: none;
 stroke: black;
 shape-rendering: crispEdges;
 }
+
 .disposalAxis, .axis text {
 font-family: sans-serif;
 font-size: 11px;
@@ -13,3 +13,13 @@ font-size: 11px;
 	stroke: #CACAC8;
 }
 
+text{
+
+	font-family: sans-serif;
+	font-size  : 12px;
+         
+}
+
+h1, h2 {
+	font-family: sans-serif;
+}

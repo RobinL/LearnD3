@@ -18,11 +18,12 @@ var custodyWidth = 100;
 
 var bottomAxisPosition = 300;
 
-var glHeight = 50;
+var glHeight = 30;
+var catSpacing = 0;  //Spacing must be > -1*glHeight and less than about glHeight/4
 
-var glSpacing = 70;
+var glSpacing = 50;
 
-var transitionDuration = 3500;
+var transitionDuration = 1500;
 
 
 /////////////////////////////////////////////////
@@ -49,6 +50,13 @@ svg.select(".axes")
 	.attr("class", "axis")
 	.call(disposalAxis);
 
+svg.select(".axes")
+	.append("text")
+	.text("Sentence length in years")
+	.attr("dx", 350+padding+custodyWidth*3)
+	.attr("dy",35)
+
+
 
 maxDisposal = disposalScale.rangeExtent()[1];
 maxCust01 = maxDisposal+custodyWidth*2;
@@ -73,7 +81,6 @@ svg.select(".axes").data([data.length*glSpacing])
 //Grid Lines
 
 gridData = [];
-
 gridData.push(sentenceToPositionMapper("Discharge",0));
 gridData.push(sentenceToPositionMapper("Fine",0));
 gridData.push(sentenceToPositionMapper("Community Order",0));
@@ -113,9 +120,6 @@ d3.select("select").on("change", function(){
 	//Get data
 	var selection = d3.select("select")[0][0].value;
 	data = JSONData[selection];
-
-
-
 
 	//GuidelineGroups will be a selection of each guideline with class .overallGuidelines.  Nested within these guidelines is the category range data.
 	var guidelineGroups = svg.selectAll(".overallGuidelines").data(data);
@@ -158,7 +162,15 @@ d3.select("select").on("change", function(){
 			})
 			.style("opacity",0.0);
 	//You can think of the enter function as 'selecting' all the elements which are entering with the assigned dataset
-					
+
+
+	//Guideline groups now exist.  We can select them and add text
+
+
+
+			
+	
+				
 
 	//Update() for 'parent' rectangles.  Note that unlike enter() and exit() there's update() is implicit.
 	guidelineGroups.select(".guidelineGroupsRectanges")
@@ -200,11 +212,20 @@ d3.select("select").on("change", function(){
 			.attr("width", 0)
 			.attr("y",function(d,i,j) {
 								
-				return j*glSpacing + glHeight/(d.gl.offencesRanges.length)*i;
+				var numSpaces = d.gl.offencesRanges.length-1;
+				var totalSpace =  numSpaces*catSpacing;
+				var catHeight = (glHeight-totalSpace)/(d.gl.offencesRanges.length);
+				var spaceToSplit = glHeight - catHeight;
+				var spaceSplit = spaceToSplit/(d.gl.offencesRanges.length-1);
+
+		
+
+
+				return j*glSpacing + spaceSplit*i ;
 			})
 			.attr("height",function(d,i){
 
-				return glHeight/(d.gl.offencesRanges.length);
+				return glHeight/(d.gl.offencesRanges.length)-catSpacing;
 			})
 			.attr("fill",function(d,i){
 
@@ -233,12 +254,27 @@ d3.select("select").on("change", function(){
 						return (sentenceToPositionMapper(d.cat.top,1)- sentenceToPositionMapper(d.cat.bottom,0));
 					})
 					.attr("y",function(d,i,j) {
+						
+						numSpaces = d.gl.offencesRanges.length-1;
 
-						return j*glSpacing + glHeight/(d.gl.offencesRanges.length)*i;
+						totalSpace =  numSpaces*catSpacing;
+
+						
+						var catHeight = (glHeight-totalSpace)/(d.gl.offencesRanges.length);
+
+						var spaceToSplit = glHeight - catHeight;
+
+						var spaceSplit = spaceToSplit/(d.gl.offencesRanges.length-1);
+
+
+						
+
+
+						return j*glSpacing + spaceSplit*i ;
 										
 					})
 					.attr("height",function(d,i){
-						return glHeight/(d.gl.offencesRanges.length);
+						return  (glHeight-totalSpace)/(d.gl.offencesRanges.length);
 					})
 					.attr("fill",function(d,i){
 
@@ -255,10 +291,11 @@ d3.select("select").on("change", function(){
 
 					//Can we bind data to the last
 
+		//Exit() for both guideline ranges and category ranges
 		guidelineGroups.exit().selectAll(".categoryRangeRect")
 					.data(cross("offencesRanges"))
 					.transition()
-					.duration(transitionDuration)
+					.duration(transitionDuration/2)
 					.attr("width", 0)
 					.attr("x", function(d,i) {
 						return (
@@ -296,14 +333,116 @@ d3.select("select").on("change", function(){
 				.remove();
 		})
 
-	
+	var newAxesPos = data.length*glSpacing;
+	var oldAxesPos = svg.select(".axes").data()[0];
 
-					
+	//Update axis position
+
+		
 
       
-		
+	//Update gridlines
+
+	if (newAxesPos-oldAxesPos > 20 ){
+		//axis animating up the page
+		svg.select(".axes").data([data.length*glSpacing])
+			.transition()
+				.duration(transitionDuration/4)
+				.style("opacity",0)
+				.transition()
+				.duration(0)
+				.attr("transform", "translate(0," + data.length*glSpacing + ")")
+				.transition()
+				.delay(2*transitionDuration/4)
+				.duration(transitionDuration/2)
+				.style("opacity",1)
+
+
+		d3.selectAll("g .gridLines")
+		.data(gridData)
+		.transition()
+		.duration(transitionDuration)
+		.attr("x1",function(d){return d;})
+		.attr("x2",function(d){return d;})
+		.attr("y1",0)
+		.attr("y2",data.length*glSpacing);
+	
+	}
+
+	else {
+		//axes going down the page
+		svg.select(".axes").data([data.length*glSpacing])
+			.transition()	
+			.delay(transitionDuration/2)	
+			.duration(transitionDuration/2)
+			.attr("transform", "translate(0," + data.length*glSpacing + ")");
+
+		d3.selectAll("g .gridLines")
+		.data(gridData)
+		.transition()
+		.delay(transitionDuration/2)	
+		.duration(transitionDuration/2)
+		.attr("x1",function(d){return d;})
+		.attr("x2",function(d){return d;})
+		.attr("y1",0)
+		.attr("y2",data.length*glSpacing);
+
+
+	}
+
+
+	//Labels etc
+
+	glNameLabels  = svg.selectAll(".glNameLabels").data(data);
+			
+	glNameLabels.enter()
+			.append("text")
+			.attr("class","glNameLabels")
+			.attr("dx", function(d) {
+						return 10+sentenceToPositionMapper(d.offencesRanges[0].top,0);
+					})
+			.attr("dy", function(d,i) {
+						return i*glSpacing +20;
+					})
+			.text(function(d) {
+				return d.offenceName;
+			})
+			.style("opacity",0);
+
+	glNameLabels
+			.transition()
+			.duration(transitionDuration/2)
+			.style("opacity",0)
+			.transition()
+			.duration(0)
+			.attr("class","glNameLabels")
+			.attr("dx", function(d) {
+						return 10+sentenceToPositionMapper(d.offencesRanges[0].top,0);
+					})
+			.attr("dy", function(d,i) {
+						return i*glSpacing +20;
+					})
+			.text(function(d) {
+				return d.offenceName;
+			})
+			.transition()
+			.duration(transitionDuration/2)
+			.style("opacity",1)
+			
+			
+			
 			
 
+	glNameLabels.exit().remove();
+			
+
+
+
+
+
+
+	guidelineGroups = svg.selectAll(".overallGuidelines");
+	
 
 });
 

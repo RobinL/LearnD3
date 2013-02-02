@@ -144,29 +144,33 @@ d3.select("select").on("change", function(){
 
 	//we want enter, change, and exits according to the data for glAll
 
-	//You can chain append statements only if previous appends 
+	//You can chain append statements only if previous appends
+	
+	//Enter for 'parent' rectangles
 	glsAll.enter()
 		.append("g")
 		.attr("class","overallGuidelines")
 		.append("rect")
 		.attr("class","overallGuidelinesRect")
 		.attr("x", function(d) {
-						return sentenceToPositionMapper(d.offencesRanges[d.offencesRanges.length-1].bottom,0);
-					})
-					.attr("width", function(d){
-						return (sentenceToPositionMapper(d.offencesRanges[0].top,0)- sentenceToPositionMapper(d.offencesRanges[d.offencesRanges.length-1].bottom,0));
-					})
-					.attr("y", function(d,i) {
-						return i*glSpacing;
-					})
-					.attr("height", function(d,i){
-						return (d.offencesRanges.length)*glHeight;
-					})
-					.attr("fill", function(d) {
-						return d.colour;
-					})
-					.attr("opacity", 0.15);
+			return sentenceToPositionMapper(d.offencesRanges[d.offencesRanges.length-1].bottom,0);
+		})
+		.attr("width", function(d){
+			return (sentenceToPositionMapper(d.offencesRanges[0].top,0)- sentenceToPositionMapper(d.offencesRanges[d.offencesRanges.length-1].bottom,0));
+		})
+		.attr("y", function(d,i) {
+			return i*glSpacing;
+		})
+		.attr("height", function(d,i){
+			return (d.offencesRanges.length)*glHeight;
+		})
+		.attr("fill", function(d) {
+			return d.colour;
+		})
+		.style("opacity",0.0);
+					
 
+	//Change for 'parent' rectangles
 	glsAll.select(".overallGuidelinesRect")
 					.attr("x", function(d) {
 						return sentenceToPositionMapper(d.offencesRanges[d.offencesRanges.length-1].bottom,0);
@@ -183,13 +187,12 @@ d3.select("select").on("change", function(){
 					.attr("fill", function(d) {
 						return d.colour;
 					})
-					.attr("opacity", 0.15);
-
+					.transition()
+					.duration(transitionDuration)
+					.style("opacity",0.15);
 	
 
-	glsAll.exit().remove();
-
-
+	
 
 
 	function cross(a) {
@@ -206,18 +209,20 @@ d3.select("select").on("change", function(){
 
 
 
-	//Enter for guidelines
-	glsAll.selectAll("rect2")
+	//Enter for category ranges
+	glsAll.selectAll(".categoryRangeRect")
 					.data(cross("offencesRanges"))
 					.enter()
 					.append("rect")
 					.attr("class", "categoryRangeRect")
 					.attr("x", function(d,i) {
-						return sentenceToPositionMapper(d.cat.bottom,0);
+						return (
+						sentenceToPositionMapper(d.cat.bottom,0) +
+						sentenceToPositionMapper(d.cat.top,1)
+						)/2
+						;
 					})
-					.attr("width", function(d){
-						return (sentenceToPositionMapper(d.cat.top,1)- sentenceToPositionMapper(d.cat.bottom,0));
-					})
+					.attr("width", 0)
 					.attr("y",function(d,i,j) {
 										
 						return j*glSpacing+i*10;
@@ -239,9 +244,11 @@ d3.select("select").on("change", function(){
 					});
 	
 
-	//Change for guidelines
+	//Change for category ranges
 	glsAll.selectAll(".categoryRangeRect")
 					.data(cross("offencesRanges"))
+					.transition()
+					.duration(transitionDuration)
 					.attr("class", "categoryRangeRect")
 					.attr("x", function(d,i) {
 						return sentenceToPositionMapper(d.cat.bottom,0);
@@ -269,27 +276,56 @@ d3.select("select").on("change", function(){
 
 					});
 
-		glsAll.selectAll(".categoryRangeRect")
+					//Can we bind data to the last
+
+		glsAll.exit().selectAll(".categoryRangeRect")
 					.data(cross("offencesRanges"))
-					.exit()
-					.remove();
+					.transition()
+					.duration(transitionDuration)
+					.attr("width", 0)
+					.attr("x", function(d,i) {
+						return (
+						sentenceToPositionMapper(d.cat.bottom,0) +
+						sentenceToPositionMapper(d.cat.top,1)
+						)/2
+						;
+					})
+					.remove().each("end", function() {      //This is a callback that happens once the animation completes
+						svg.selectAll(".overallGuidelines")
+						.data(data)
+						.exit()
+						.remove();
+					});
+						
+
+
+
+
+
+
+
 					
 
+	glsAll.exit()
+		.select(".overallGuidelinesRect")
+		.transition()
+		.duration(transitionDuration)
+		.style("opacity",0.0)
+		.remove().each("end", function() {
+			svg.selectAll(".overallGuidelines")
+				.data(data)
+				.exit()
+				
+				.remove();
+		})
 
-
-
-					
-
-	myvar = d3.selectAll(".offenceRanges");
+	
 
 					
 
       
 		
 			
-	
-
-
 
 
 });

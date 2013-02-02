@@ -13,16 +13,16 @@ h = svg[0][0]["clientHeight"];
 
 var data = JSONData[0];
 
-
 var disposalWidth = 350+padding;
 var custodyWidth = 100;
 
 var bottomAxisPosition = 300;
 
-var glHeight = 10;
-var glSpacing = 50;
+var glHeight = 50;
 
-var transitionDuration = 1500;
+var glSpacing = 70;
+
+var transitionDuration = 3500;
 
 
 /////////////////////////////////////////////////
@@ -104,28 +104,7 @@ group.selectAll("gridLines")
 /////////////////////////////////////////////////
 
 
-function sentenceToPositionMapper(sentence, topOrBottom) {
 
-	var returnVal;
-
-	if (sentence === "Discharge" || sentence ==="Fine" || sentence === "Community Order"){
-
-		returnVal = disposalScale(sentence);
-
-		if (topOrBottom === 1) {
-			returnVal += disposalScale.rangeBand();
-		}
-
-		return returnVal;
-
-	}
-
-
-	if (sentence >=0) {
-			return custodyScale(sentence);
-		}
-
-}
 
 
 
@@ -136,42 +115,55 @@ d3.select("select").on("change", function(){
 	data = JSONData[selection];
 
 
-	//Now need to do nested iterations
-
-	//gslAll will be a selection of each GROUP with class .overallGuidelines.
-	var glsAll = svg.selectAll(".overallGuidelines").data(data);
 
 
-	//we want enter, change, and exits according to the data for glAll
+	//GuidelineGroups will be a selection of each guideline with class .overallGuidelines.  Nested within these guidelines is the category range data.
+	var guidelineGroups = svg.selectAll(".overallGuidelines").data(data);
 
-	//You can chain append statements only if previous appends
+/*
+	When we update the data we want to:
+	1.  Determine whether any 'parent' guidelines need to enter
+		a.  Animate entrance of parent
+		b.  Animate entrance of chilren (category ranges)
+	2.  Determine whether any 'parent' guideline need to be updated
+		a. Animate parent	(overall guideline range)
+		b. Animate children (category ranges)
+	3.  Determine whether any 'parent' guidelines need to exit
+		a. Animate children being removed
+		b.  Animate parent removal
+		c.  Ensure that removal of parent elements happens only after animations have
+*/
 	
-	//Enter for 'parent' rectangles
-	glsAll.enter()
+	
+	//Enter for 'parent' rectangles, which represent the overall guideline range
+	guidelineGroups.enter()
 		.append("g")
-		.attr("class","overallGuidelines")
-		.append("rect")
-		.attr("class","overallGuidelinesRect")
-		.attr("x", function(d) {
-			return sentenceToPositionMapper(d.offencesRanges[d.offencesRanges.length-1].bottom,0);
-		})
-		.attr("width", function(d){
-			return (sentenceToPositionMapper(d.offencesRanges[0].top,0)- sentenceToPositionMapper(d.offencesRanges[d.offencesRanges.length-1].bottom,0));
-		})
-		.attr("y", function(d,i) {
-			return i*glSpacing;
-		})
-		.attr("height", function(d,i){
-			return (d.offencesRanges.length)*glHeight;
-		})
-		.attr("fill", function(d) {
-			return d.colour;
-		})
-		.style("opacity",0.0);
+			.attr("class","overallGuidelines")
+		.append("rect") //You can chain append statements, but only if the previous append is suitable (e.g. you can't append anything to a rectangle)
+			.attr("class","guidelineGroupsRectanges")
+			.attr("x", function(d) {
+				return sentenceToPositionMapper(d.offencesRanges[d.offencesRanges.length-1].bottom,0);
+			})
+			.attr("width", function(d){
+				return (sentenceToPositionMapper(d.offencesRanges[0].top,0)- sentenceToPositionMapper(d.offencesRanges[d.offencesRanges.length-1].bottom,0));
+			})
+			.attr("y", function(d,i) {
+				return i*glSpacing;
+			})
+			.attr("height", function(d,i){
+				return glHeight;
+			})
+			.attr("fill", function(d) {
+				return d.colour;
+			})
+			.style("opacity",0.0);
+	//You can think of the enter function as 'selecting' all the elements which are entering with the assigned dataset
 					
 
-	//Change for 'parent' rectangles
-	glsAll.select(".overallGuidelinesRect")
+	//Update() for 'parent' rectangles.  Note that unlike enter() and exit() there's update() is implicit.
+	guidelineGroups.select(".guidelineGroupsRectanges")
+					.transition()
+					.duration(transitionDuration)
 					.attr("x", function(d) {
 						return sentenceToPositionMapper(d.offencesRanges[d.offencesRanges.length-1].bottom,0);
 					})
@@ -179,73 +171,57 @@ d3.select("select").on("change", function(){
 						return (sentenceToPositionMapper(d.offencesRanges[0].top,0)- sentenceToPositionMapper(d.offencesRanges[d.offencesRanges.length-1].bottom,0));
 					})
 					.attr("y", function(d,i) {
-						return i*glSpacing;
+						return glSpacing*i;
 					})
 					.attr("height", function(d,i){
-						return (d.offencesRanges.length)*glHeight;
+						return glHeight;
 					})
 					.attr("fill", function(d) {
 						return d.colour;
 					})
-					.transition()
-					.duration(transitionDuration)
 					.style("opacity",0.15);
 	
 
-	
-
-
-	function cross(a) {
-		return function(d) {
-			b = d[a]
-			var c = [];
-			for(var i = 0, n = b.length; i < n; i++) c.push({
-				gl: d,
-				cat: b[i]
-			});
-			return c;
-		};
-	}
-
-
 
 	//Enter for category ranges
-	glsAll.selectAll(".categoryRangeRect")
-					.data(cross("offencesRanges"))
-					.enter()
-					.append("rect")
-					.attr("class", "categoryRangeRect")
-					.attr("x", function(d,i) {
-						return (
-						sentenceToPositionMapper(d.cat.bottom,0) +
-						sentenceToPositionMapper(d.cat.top,1)
-						)/2
-						;
-					})
-					.attr("width", 0)
-					.attr("y",function(d,i,j) {
-										
-						return j*glSpacing+i*10;
-					})
-					.attr("height",function(d,i){
-						return glHeight;
-					})
-					.attr("fill",function(d,i){
+	guidelineGroups
+			.selectAll(".categoryRangeRect") //We're performing a 'double' or 'nested' selection.  This means that for each element in guidelineGroups we will make a selection. As a result there's a nested loop going on.  D3 helps us out by indexing both of these loops using i and j
+			.data(cross("offencesRanges"))  //The cross function outputs a FUNCTION.  It inputs the data for the parent element it, and does something a bit like a cartesian join against each of the three category ranges in the child data.  This means that each child has access to the parent data.
+			.enter()
+			.append("rect")
+			.attr("class", "categoryRangeRect")
+			.attr("x", function(d,i) {
+				return (
+				sentenceToPositionMapper(d.cat.bottom,0) +
+				sentenceToPositionMapper(d.cat.top,1)
+				)/2
+				;
+			})
+			.attr("width", 0)
+			.attr("y",function(d,i,j) {
+								
+				return j*glSpacing + glHeight/(d.gl.offencesRanges.length)*i;
+			})
+			.attr("height",function(d,i){
 
-						var lightnessScale = d3.scale.linear()
-							.domain([0,d.gl.offencesRanges.length-1])
-							.range([0.1,0.6]);
+				return glHeight/(d.gl.offencesRanges.length);
+			})
+			.attr("fill",function(d,i){
 
-						col = d3.hsl(d.gl.colour);
-						col.l = lightnessScale(i);
+				var lightnessScale = d3.scale.linear()
+					.domain([0,d.gl.offencesRanges.length-1])
+					.range([0.1,0.6]);
 
-					return col;
+				col = d3.hsl(d.gl.colour);
+				col.l = lightnessScale(i);
 
-					});
+			return col;
+
+			});
 	
 
-	//Change for category ranges
-	glsAll.selectAll(".categoryRangeRect")
+	//Update() for category ranges
+	guidelineGroups.selectAll(".categoryRangeRect")
 					.data(cross("offencesRanges"))
 					.transition()
 					.duration(transitionDuration)
@@ -257,11 +233,12 @@ d3.select("select").on("change", function(){
 						return (sentenceToPositionMapper(d.cat.top,1)- sentenceToPositionMapper(d.cat.bottom,0));
 					})
 					.attr("y",function(d,i,j) {
+
+						return j*glSpacing + glHeight/(d.gl.offencesRanges.length)*i;
 										
-						return j*glSpacing+i*10;
 					})
 					.attr("height",function(d,i){
-						return glHeight;
+						return glHeight/(d.gl.offencesRanges.length);
 					})
 					.attr("fill",function(d,i){
 
@@ -278,7 +255,7 @@ d3.select("select").on("change", function(){
 
 					//Can we bind data to the last
 
-		glsAll.exit().selectAll(".categoryRangeRect")
+		guidelineGroups.exit().selectAll(".categoryRangeRect")
 					.data(cross("offencesRanges"))
 					.transition()
 					.duration(transitionDuration)
@@ -306,8 +283,8 @@ d3.select("select").on("change", function(){
 
 					
 
-	glsAll.exit()
-		.select(".overallGuidelinesRect")
+	guidelineGroups.exit()
+		.select(".guidelineGroupsRectanges")
 		.transition()
 		.duration(transitionDuration)
 		.style("opacity",0.0)
@@ -333,218 +310,39 @@ d3.select("select").on("change", function(){
 d3.select("select").on("change")();
 
 
+//Utility functions
+
+function sentenceToPositionMapper(sentence, topOrBottom) {
+
+	var returnVal;
+
+	if (sentence === "Discharge" || sentence ==="Fine" || sentence === "Community Order"){
+
+		returnVal = disposalScale(sentence);
+
+		if (topOrBottom === 1) {
+			returnVal += disposalScale.rangeBand();
+		}
+
+		return returnVal;
+
+	}
 
 
+	if (sentence >=0) {
+			return custodyScale(sentence);
+		}
 
+}
 
-
-// d3.select("select").on("change", function(){
-
-// 	var selection = d3.select("select")[0][0].value;
-
-// 	data = JSONData[selection];
-
-	
-// 	var glsOverall = svg.selectAll(".overallGuidelines")
-// 					.data(data);
-
-// 	glsOverall.transition()
-// 				.duration(transitionDuration)
-// 				.attr("x", function(d) {
-// 						return sentenceToPositionMapper(d.offencesRanges[d.offencesRanges.length-1].bottom,0);
-// 					})
-// 					.attr("width", function(d){
-// 						return (sentenceToPositionMapper(d.offencesRanges[0].top,0)- sentenceToPositionMapper(d.offencesRanges[d.offencesRanges.length-1].bottom,0));
-// 					})
-// 				.attr("y", function(d,i) {
-// 					return i*glSpacing;
-// 				})
-// 				.attr("height", function(d,i){
-// 					return (d.offencesRanges.length)*glHeight;
-// 				})
-// 				.attr("fill", function(d) {
-// 					return d.colour;
-// 				})
-// 				.attr("opacity", 0.15);
-
-// 	glsOverall.enter()
-// 			.append("rect")
-// 					.attr("class","overallGuidelines")
-// 					.attr("x", function(d) {
-// 						return sentenceToPositionMapper(d.offencesRanges[d.offencesRanges.length-1].bottom,0);
-// 					})
-// 					.attr("width", function(d){
-// 						return (sentenceToPositionMapper(d.offencesRanges[0].top,0)- sentenceToPositionMapper(d.offencesRanges[d.offencesRanges.length-1].bottom,0));
-// 					})
-// 					.attr("y", function(d,i) {
-// 						return i*glSpacing;
-// 					})
-// 					.attr("height", function(d,i){
-// 						return (d.offencesRanges.length)*glHeight;
-// 					})
-// 					.attr("fill", function(d) {
-// 						return d.colour;
-// 					})
-// 					.attr("opacity", 0)
-// 					.transition()
-// 					.duration(transitionDuration)
-// 					.attr("opacity", 0.15);
-			
-
-
-
-
-// 	glsOverall
-// 		.exit()
-// 		.transition()
-// 		.duration(transitionDuration/3)
-// 		.attr("opacity",0)
-// 		.remove();
-
-
-
-
-// 	for (var gl = 0; gl < data.length; gl++) {
-
-
-// 		var thisone = svg.selectAll(".rectangle"+gl)
-// 			.data(data[gl].offencesRanges);
-		
-// 		thisone
-// 			.transition()
-// 			.duration(transitionDuration)
-// 			.attr("x", function(d) {
-// 				return sentenceToPositionMapper(d.bottom,0);
-// 			})
-// 			.attr("width", function(d){
-// 				return sentenceToPositionMapper(d.top,1) -sentenceToPositionMapper(d.bottom,0);
-// 			})
-// 			.attr("y",function(d,i) {
-// 				return i*glHeight +gl*glSpacing;
-// 			})
-// 			.attr("height",glHeight)
-// 			.attr("fill",function(d,i){
-
-// 			var lightnessScale = d3.scale.linear()
-// 							.domain([0,data[gl].offencesRanges.length-1])
-// 							.range([0.1,0.6]);
-
-// 			col = d3.hsl(data[gl].colour);
-// 			col.l = lightnessScale(i);
-
-// 			return col;
-
-// 		});
-
-
-// 	thisone
-// 		.enter()
-// 		.append("rect")
-// 		.attr("class", "rectangle"+gl)
-// 		.attr("x", function(d) {
-// 		return sentenceToPositionMapper(d.bottom,0);
-// 		})
-// 	.attr("width", 0)
-// 	.attr("y",function(d,i) {
-// 		return i*glHeight +gl*glSpacing;
-// 		})
-// 	.attr("height",glHeight)
-// 	.attr("fill",function(d,i){
-
-// 		var lightnessScale = d3.scale.linear()
-// 						.domain([0,data[gl].offencesRanges.length-1])
-// 						.range([0.1,0.6]);
-
-// 		col = d3.hsl(data[gl].colour);
-// 		col.l = lightnessScale(i);
-
-// 		return col;
-
-// 	})
-// 	.transition()
-//       .duration(transitionDuration)
-//       .attr("width", function(d){
-// 		return sentenceToPositionMapper(d.top,1) -sentenceToPositionMapper(d.bottom,0);
-// 		})
-
-
-//       thisone
-// 		.exit()
-// 		.transition()
-// 		.duration(transitionDuration)
-// 		.attr("width",0)
-// 		.attr("height",0)
-// 		.remove()
-		
-			
-// 	};
-
-
-// 	for (var gl = 0; gl < data.length+10; gl++) {
-
-// 		if (!data[gl]) {
-// 		var thisone = svg.selectAll(".rectangle"+gl)
-// 		.transition()
-// 		.duration(transitionDuration/3)
-// 		.attr("opacity",0)
-// 		.remove()
-// 	}
-// 	}
-
-
-// 	var newAxesPos = data.length*glSpacing;
-// 	var oldAxesPos = svg.select(".axes").data()[0];
-
-// 	if (newAxesPos > oldAxesPos) {
-// 		svg.select(".axes").data([data.length*glSpacing])
-// 			.transition()
-// 			.duration(transitionDuration/4)
-// 			.style("opacity",0)
-// 			.transition()
-// 			.duration(0)
-// 			.attr("transform", "translate(0," + data.length*glSpacing + ")")
-// 			.transition()
-// 			.delay(2*transitionDuration/4)
-// 			.duration(transitionDuration/2)
-// 			.style("opacity",1)
-
-
-		
-
-// 		svg.selectAll(".gridLines")
-// 			.data(gridData)
-// 			.transition()
-// 			.duration(transitionDuration/2)
-// 			.attr("x1",function(d){return d;})
-// 			.attr("x2",function(d){return d;})
-// 			.attr("y1",0)
-// 			.attr("y2",data.length*glSpacing)
-// 			.attr("class","gridLines");
-
-// 	} else {
-
-// 		svg.select(".axes").data([data.length*glSpacing])
-// 			.transition()
-// 			.delay(transitionDuration/3)
-// 			.duration(transitionDuration/2)
-// 			.attr("transform", "translate(0," + data.length*glSpacing + ")");
-
-// 		svg.selectAll(".gridLines")
-// 			.data(gridData)
-// 			.transition()
-// 			.delay(transitionDuration/3)
-// 			.duration(transitionDuration/2)
-// 			.attr("x1",function(d){return d;})
-// 			.attr("x2",function(d){return d;})
-// 			.attr("y1",0)
-// 			.attr("y2",data.length*glSpacing)
-// 			.attr("class","gridLines");
-// 	}
-
-	
-
-
-
-
-// });
-
+function cross(a) {
+		return function(d) {
+			b = d[a]
+			var c = [];
+			for(var i = 0, n = b.length; i < n; i++) c.push({
+				gl: d,
+				cat: b[i]
+			});
+			return c;
+		};
+	}

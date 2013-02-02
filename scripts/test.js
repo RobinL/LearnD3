@@ -117,6 +117,12 @@ group.selectAll("gridLines")
 
 d3.select("select").on("change", function(){
 
+	glHeight = document.myform.glHeight.value;
+	catSpacing = document.myform.catSpacing.value;
+	glSpacing = document.myform.glSpacing.value;
+	transitionDuration = document.myform.transitionDuration.value;
+
+
 	//Get data
 	var selection = d3.select("select")[0][0].value;
 	data = JSONData[selection];
@@ -289,7 +295,19 @@ d3.select("select").on("change", function(){
 
 					});
 
-					//Can we bind data to the last
+		guidelineGroups.selectAll(".categoryRangeRect")
+					.data(cross("offencesRanges"))
+					.exit()
+					.transition()
+					.duration(transitionDuration/2)
+					.attr("width",0)
+					.attr("x",function(d,i) {
+						return (
+						(sentenceToPositionMapper(d.cat.bottom,0) +
+						sentenceToPositionMapper(d.cat.top,1)
+						)/2);
+					})	
+					.remove();
 
 		//Exit() for both guideline ranges and category ranges
 		guidelineGroups.exit().selectAll(".categoryRangeRect")
@@ -447,6 +465,10 @@ d3.select("select").on("change", function(){
 });
 
 d3.select("select").on("change")();
+
+d3.select("form").on("change",function() {
+		d3.select("select").on("change")();
+})
 
 
 //Utility functions

@@ -2,7 +2,7 @@
 
 
 var JSONData = [
-	[
+	
 		{offenceName: "GBH with intent",
 		colour: "#0072c1",
 		offencesRanges: [
@@ -129,10 +129,10 @@ var JSONData = [
 			}
 			]
 		}
-	]
+	
 	,
 	
-	[{
+	{
 	offenceName: "Aggravated burglary",
 	colour: "#4AAB2E",
 	offencesRanges: [
@@ -190,9 +190,7 @@ var JSONData = [
 		startingpoint: "Community Order",
 		top: 18/52
 		}
-	
 		]
 	}
-	]
 ];
 

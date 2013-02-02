@@ -1,9 +1,8 @@
 #logo {
+	display:block;
 	float:right;
-	
 
 }
-
 
 .disposalAxis, .axis path, .disposalAxis, .axis line {
 fill: none;
@@ -34,4 +33,3 @@ h1, h2 {
 svg {
 	padding:50px;
 }
-

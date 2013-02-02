@@ -1,3 +1,7 @@
+$(function() {
+
+ $("#guidelines").select2();
+
 w = window.innerWidth-25;
 h = window.innerHeight-25;
 padding = 40;
@@ -11,7 +15,7 @@ w = svg[0][0]["clientWidth"];
 h = svg[0][0]["clientHeight"];
 
 
-var data = JSONData[0];
+data = JSONData;
 
 var disposalWidth = 350+padding;
 var custodyWidth = 100;
@@ -110,12 +114,13 @@ group.selectAll("gridLines")
 //Draw guideline ranges
 /////////////////////////////////////////////////
 
+data = [];
+selectionsInOrder = [];
 
 
 
 
-
-d3.select("select").on("change", function(){
+$('#guidelines').on("change", function () {
 
 	glHeight = document.myform.glHeight.value;
 	catSpacing = document.myform.catSpacing.value;
@@ -123,9 +128,13 @@ d3.select("select").on("change", function(){
 	transitionDuration = document.myform.transitionDuration.value;
 
 
-	//Get data
-	var selection = d3.select("select")[0][0].value;
-	data = JSONData[selection];
+	updateSelections();
+	
+
+
+
+
+		
 
 	//GuidelineGroups will be a selection of each guideline with class .overallGuidelines.  Nested within these guidelines is the category range data.
 	var guidelineGroups = svg.selectAll(".overallGuidelines").data(data);
@@ -464,11 +473,9 @@ d3.select("select").on("change", function(){
 
 });
 
-d3.select("select").on("change")();
 
-d3.select("form").on("change",function() {
-		d3.select("select").on("change")();
-})
+
+
 
 
 //Utility functions
@@ -507,3 +514,75 @@ function cross(a) {
 			return c;
 		};
 	}
+
+$('#guidelines').trigger("change");
+
+}); //end of jquery doc ready
+
+
+var updateSelections = function() {
+
+	var mySelection = $("#guidelines").select2('val');
+
+	mySelectionInv = invert(mySelection);
+	selectionsInOrderInv = invert(selectionsInOrder);
+
+	for (var i in mySelectionInv) {
+		if (!(i in selectionsInOrderInv)) {
+			data.push(JSONData[i]);
+			selectionsInOrder.push(i)
+		}
+	}
+
+	for (var j in selectionsInOrderInv) {
+		if (!(j in mySelectionInv)) {
+
+			
+			togetrid =parseInt(selectionsInOrderInv[j]);
+			data.remove(togetrid);
+			selectionsInOrder.remove(togetrid);
+
+		}
+	}
+
+
+	// for (var i in mySelection){
+
+	// 	var alreadythere = false;
+
+	// 	for (j in selectionsInOrder) {
+	// 		if (mySelection[i] == selectionsInOrder[j]){
+	// 			alreadythere = true;
+	// 		}
+	// 	}
+
+	// 	if (alreadythere===false)  {
+	// 		selectionsInOrder.push(mySelection[i])
+	// 		data.push(JSONData[mySelection[i]]);
+	// 	}
+
+	// };
+
+};
+
+
+var invert = function(obj) {
+
+	var new_obj = {};
+
+	for(var prop in obj) {
+		if(obj.hasOwnProperty(prop)) {
+			new_obj[obj[prop]] = prop;
+		}
+	}
+
+	return new_obj;
+};
+
+
+
+Array.prototype.remove = function(from, to) {
+  var rest = this.slice((to || from) + 1 || this.length);
+  this.length = from < 0 ? this.length + from : from;
+  return this.push.apply(this, rest);
+};

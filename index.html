@@ -9,19 +9,37 @@
 
 
 
-<link rel="stylesheet" href="style.css" type="text/css">
+
+<link rel="stylesheet" href="css/select2.css" type="text/css">
+<link rel="stylesheet" href="css/style.css" type="text/css">
 
 </head>
 
 <body>
+<div >
+<a href="http://sentencingcouncil.judiciary.gov.uk/"><img id="logo" src="images/logo2.jpg" alt="Sentencing Council logo"></a>
+</div>
 
 
+<h1>Mega guideline comparer</h1>
+<h2>Choose guideline:</h2>
 
-<h1>Mega guideline comparinator</h1>
-<h2>Choose guideline: <select multiple style:"inline">
-  <option value="0">Assaults</option>
-  <option value="1">Burglary</option>
-</select></h2>
+<div > 
+<select id="guidelines" multiple style="width:600px">
+  <option value="0" selected>GBH with intent</option>
+  <option value="1" selected>GBH</option>
+  <option value ="2" selected>ABH </option>
+  <option value ="3" selected>Intent to resist arrest </option>
+  <option value ="4" selected>Assault on PC </option>
+  <option value ="5" selected>Common assault </option>
+  <option value ="6">Aggravated burglary </option>
+  <option value ="7">Domestic burglary </option>
+  <option value ="8">Non-domestic burglary </option>
+</select>
+</div>
+
+<p></p>
+<h2>Choose some options:</h2>
 
 <form name="myform">
 glHeight: <input type="text" name="glHeight" value=30>
@@ -32,9 +50,9 @@ transitionDuration:<input type="text" name="transitionDuration" value=1500>
 
 </body>
 
-
-
-<script src="scripts/offencejson.js"></script>
+<script src="scripts/jquery-1.9.0.min.js"></script>
+<script src="scripts/select2.min.js"></script>
+<script src="scripts/offencejson2.js"></script>
 <script src="scripts/d3.js"></script>
 <script src="scripts/test.js"></script>
 

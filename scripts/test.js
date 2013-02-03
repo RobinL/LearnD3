@@ -472,7 +472,9 @@ $('#guidelines').on("change", function () {
 
 
 
-	//Want to create a onclick event that selects elements
+//Want to create a onclick events to select elements of the visualisation and display information
+
+$('.categoryRangeRect').off("click");
 $('.categoryRangeRect').on("click", function () {
 
 	$('#guidelines').trigger("change");
@@ -483,23 +485,46 @@ $('.categoryRangeRect').on("click", function () {
 
 	$('#dataDisplay').html("");
 
-	var newtext = "<div>The selected guideline is: " + this.__data__.gl.offenceName + "<\div>";
+	var newtext = "<div>The selected guideline is: " + this.__data__.gl.offenceName + "</div>";
 	$('#dataDisplay').append(newtext);
 
-	newtext = "<div>The selected category range is: " + this.__data__.cat.name + "<\div>";
+	newtext = "<div>The selected category range is: " + this.__data__.cat.name + "</div>";
 	$('#dataDisplay').append(newtext);
 
 	var numcats = this.__data__.gl.offencesRanges.length;
-	newtext = "<div>The selected category range is: " +  this.__data__.cat.bottom
-	newtext = newtext + " to " +this.__data__.cat.top + "<\div>";
+	newtext = "<div>The category range is: " +  this.__data__.cat.bottom
+	newtext = newtext + " to " +this.__data__.cat.top + "</div>";
 	$('#dataDisplay').append(newtext);
 
 	var numcats = this.__data__.gl.offencesRanges.length;
 	newtext = "<div>The overall guideline range is: " +  this.__data__.gl.offencesRanges[numcats-1].bottom
-	newtext = newtext + " to " +this.__data__.gl.offencesRanges[0].top + "<\div>";
+	newtext = newtext + " to " +this.__data__.gl.offencesRanges[0].top + "</div>";
 	$('#dataDisplay').append(newtext);
 
+});
+
+
+$('.guidelineGroupsRectanges').off("click");
+$('.guidelineGroupsRectanges').on("click", function () {
+
+	$('#guidelines').trigger("change");
+	d3.select(this)
+		.transition()
+		.duration(transitionDuration/4)
+		.attr("fill","#F4EF33")
+
+	$('#dataDisplay').html("");
+
+	var newtext = "<div>The selected guideline is: " + this.__data__.offenceName + "</div>";
+	$('#dataDisplay').append(newtext);
+
+	(newtext);
+
 	
+	var numcats = this.__data__.offencesRanges.length;
+	newtext = "<div>The overall guideline range is: " +  this.__data__.offencesRanges[numcats-1].bottom
+	newtext = newtext + " to " +this.__data__.offencesRanges[0].top + "</div>";
+	$('#dataDisplay').append(newtext);
 
 });
 			

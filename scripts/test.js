@@ -6,7 +6,7 @@ w = window.innerWidth-25;
 h = window.innerHeight-25;
 padding = 40;
 
-svg = d3.select("body")
+svg = d3.select("#svgHolder")
 	.append("svg")
 	.attr("width", w)
 	.attr("height", h);
@@ -20,7 +20,7 @@ data = JSONData;
 var disposalWidth = 350+padding;
 var custodyWidth = 100;
 
-var bottomAxisPosition = 300;
+var bottomAxisPosition = 0;
 
 var glHeight = 30;
 var catSpacing = 0;  //Spacing must be > -1*glHeight and less than about glHeight/4
@@ -79,7 +79,7 @@ svg.select(".axes").append("g")
 	.call(custodyScaleAxis);
 
 svg.select(".axes").data([data.length*glSpacing])
-			.attr("transform", "translate(0," + data.length*glSpacing + ")");
+			.attr("transform", "translate(0," + 6*glSpacing + ")");
 
 
 //Grid Lines
@@ -126,6 +126,9 @@ $('#guidelines').on("change", function () {
 	catSpacing = document.myform.catSpacing.value;
 	glSpacing = document.myform.glSpacing.value;
 	transitionDuration = document.myform.transitionDuration.value;
+	
+
+
 
 
 	updateSelections();
@@ -516,6 +519,14 @@ function cross(a) {
 	}
 
 $('#guidelines').trigger("change");
+
+$('form[name="myform"]').on("change", function () {
+	$('#guidelines').trigger("change");
+
+	})
+
+
+
 
 }); //end of jquery doc ready
 

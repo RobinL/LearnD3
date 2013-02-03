@@ -16,16 +16,23 @@
 </head>
 
 <body>
+
+<div id="main">
+
 <div >
 <a href="http://sentencingcouncil.judiciary.gov.uk/"><img id="logo" src="images/logo2.jpg" alt="Sentencing Council logo"></a>
 </div>
 
 
-<h1>Mega guideline comparer</h1>
-<h2>Choose guideline:</h2>
+
+
+<h1>SC guideline comparitor</h1>
+<hr>
+<div class="lefthalf">
+<h2>Choose guidelines:</h2>
 
 <div > 
-<select id="guidelines" multiple style="width:600px">
+<select id="guidelines" multiple style="width:470px">
   <option value="0" selected>GBH with intent</option>
   <option value="1" selected>GBH</option>
   <option value ="2" selected>ABH </option>
@@ -37,16 +44,30 @@
   <option value ="8">Non-domestic burglary </option>
 </select>
 </div>
+</div>
 
-<p></p>
+<div class="righthalf">
 <h2>Choose some options:</h2>
 
 <form name="myform">
-glHeight: <input type="text" name="glHeight" value=30>
-catSpacing:<input type="text" name="catSpacing" value=0>
-glSpacing:<input type="text" name="glSpacing" value=50>
-transitionDuration:<input type="text" name="transitionDuration" value=1500>
+<label> Guideline height: </label><input type="text" name="glHeight" value=30>
+<label> Category spacing:</label><input type="text" name="catSpacing" value=0>
+<label> Guideline spacing:</label><input type="text" name="glSpacing" value=50>
+<label> Transition duration:</label><input type="text" name="transitionDuration" value=1500>
+
+
 </form>
+
+</div>
+
+<div id="clear"></div>
+
+<hr>
+
+<div id="svgHolder">
+</div>
+
+
 
 </body>
 

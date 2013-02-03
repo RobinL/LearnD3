@@ -1,3 +1,32 @@
+
+body {
+	background-color: #E3E3E1;
+	background-image:url(kindajean.png);
+	background-repeat:repeat;
+}
+
+#main {
+	width: 1000px;
+	margin-right: auto;
+	margin-left: auto;
+	border: 2px solid #BEC2C2;
+	padding:20px;
+	border-radius: 20px;
+	margin-top:20px;
+	background-color: #FFFFFF;
+	box-shadow: 10px 10px 15px #4D4D4D;
+}
+
+.lefthalf {
+	width: 490px;
+	float:left;
+}
+
+.righthalf {
+	width: 490px;
+	float:right;
+}
+
 #logo {
 	display:block;
 	float:right;
@@ -28,8 +57,55 @@ text{
 
 h1, h2 {
 	font-family: sans-serif;
+	color: #4A5151;
 }
 
-svg {
-	padding:50px;
+#svgHolder {
+	clear:both;
+	padding-top: 30px
+
+}
+
+#clear {
+	clear: both;
+	padding: 5px;
+}
+
+hr {
+	border: 1px solid #999999;
+}
+
+label{
+    display: inline-block;
+    float: left;
+    clear: left;
+    width: 150px;
+    text-align: left;
+    font-family: sans-serif;
+}
+input {
+  display: inline-block;
+  float: left;
+  width:100px;
+}
+
+
+h1 {  
+    position: relative;  
+    font-size: 50px;  
+    margin-top: 0;  
+    font-family: 'Myriad-Pro', 'Myriad', helvetica, arial, sans-serif;  
+    text-shadow: 1px 1px 4px #6E6E6E;  
+    letter-spacing: -2px;  
+     
+}
+
+h2 {  
+    position: relative;  
+    font-size: 30px;  
+    margin-top: 0;  
+    font-family: 'Myriad-Pro', 'Myriad', helvetica, arial, sans-serif;  
+    text-shadow: 1px 1px 3px #8F8F8F;  
+    letter-spacing: -1px;  
+     
 }

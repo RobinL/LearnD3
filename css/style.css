@@ -3,13 +3,14 @@ body {
 	background-color: #E3E3E1;
 	background-image:url(kindajean.png);
 	background-repeat:repeat;
+	font-family: sans-serif;
 }
 
 #main {
 	width: 1000px;
 	margin-right: auto;
 	margin-left: auto;
-	border: 2px solid #BEC2C2;
+	border: 2px solid #8C9393;
 	padding:20px;
 	border-radius: 20px;
 	margin-top:20px;
@@ -62,7 +63,9 @@ h1, h2 {
 
 #svgHolder {
 	clear:both;
-	padding-top: 30px
+	padding-top: 30px;
+	margin-right: auto;
+	margin-left: auto;
 
 }
 
@@ -108,4 +111,12 @@ h2 {
     text-shadow: 1px 1px 3px #8F8F8F;  
     letter-spacing: -1px;  
      
+}
+
+#dataDisplay{
+	background-color: #D3D3D3;
+	border-radius: 10px;
+	padding: 10px;
+	margin: 10px;
+
 }

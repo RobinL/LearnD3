@@ -2,23 +2,21 @@ $(function() {
 
  $("#guidelines").select2();
 
-w = window.innerWidth-25;
-h = window.innerHeight-25;
-padding = 40;
+w=1000;
+h=350;
+padding = 10;
 
 svg = d3.select("#svgHolder")
 	.append("svg")
 	.attr("width", w)
 	.attr("height", h);
 
-w = svg[0][0]["clientWidth"];
-h = svg[0][0]["clientHeight"];
 
 
 data = JSONData;
 
-var disposalWidth = 350+padding;
-var custodyWidth = 100;
+var disposalWidth = 300+padding;
+var custodyWidth = (w-disposalWidth-padding)/6;
 
 var bottomAxisPosition = 0;
 
@@ -63,11 +61,11 @@ svg.select(".axes")
 
 
 maxDisposal = disposalScale.rangeExtent()[1];
-maxCust01 = maxDisposal+custodyWidth*2;
+
 
 var custodyScale = d3.scale.linear()
 						.domain([0,1,2,4,8,16,32])
-						.range(d3.range(0+maxDisposal,700+maxDisposal,100));
+						.range(d3.range(0+maxDisposal,7*custodyWidth+maxDisposal,custodyWidth));
 
 
 var custodyScaleAxis = d3.svg.axis()
@@ -127,17 +125,14 @@ $('#guidelines').on("change", function () {
 	glSpacing = document.myform.glSpacing.value;
 	transitionDuration = document.myform.transitionDuration.value;
 	
-
-
-
-
 	updateSelections();
 	
+	//Resize the svg
 
 
 
-
-		
+	
+	
 
 	//GuidelineGroups will be a selection of each guideline with class .overallGuidelines.  Nested within these guidelines is the category range data.
 	var guidelineGroups = svg.selectAll(".overallGuidelines").data(data);
@@ -396,6 +391,11 @@ $('#guidelines').on("change", function () {
 		.attr("x2",function(d){return d;})
 		.attr("y1",0)
 		.attr("y2",data.length*glSpacing);
+
+		d3.select("#svgHolder svg")
+		.transition()
+		.duration(transitionDuration)
+		.attr("height",data.length*glSpacing+50)
 	
 	}
 
@@ -416,6 +416,12 @@ $('#guidelines').on("change", function () {
 		.attr("x2",function(d){return d;})
 		.attr("y1",0)
 		.attr("y2",data.length*glSpacing);
+
+		d3.select("#svgHolder svg")
+		.transition()	
+			.delay(transitionDuration/2)	
+			.duration(transitionDuration/2)
+		.attr("height",data.length*glSpacing+50)
 
 
 	}
@@ -461,20 +467,61 @@ $('#guidelines').on("change", function () {
 			
 			
 			
-			
-
 	glNameLabels.exit().remove();
-			
 
 
 
 
+	//Want to create a onclick event that selects elements
+$('.categoryRangeRect').on("click", function () {
 
+	$('#guidelines').trigger("change");
+	d3.select(this)
+		.transition()
+		.duration(transitionDuration/4)
+		.attr("fill","#F4EF33")
 
-	guidelineGroups = svg.selectAll(".overallGuidelines");
+	$('#dataDisplay').html("");
+
+	var newtext = "<div>The selected guideline is: " + this.__data__.gl.offenceName + "<\div>";
+	$('#dataDisplay').append(newtext);
+
+	newtext = "<div>The selected category range is: " + this.__data__.cat.name + "<\div>";
+	$('#dataDisplay').append(newtext);
+
+	var numcats = this.__data__.gl.offencesRanges.length;
+	newtext = "<div>The selected category range is: " +  this.__data__.cat.bottom
+	newtext = newtext + " to " +this.__data__.cat.top + "<\div>";
+	$('#dataDisplay').append(newtext);
+
+	var numcats = this.__data__.gl.offencesRanges.length;
+	newtext = "<div>The overall guideline range is: " +  this.__data__.gl.offencesRanges[numcats-1].bottom
+	newtext = newtext + " to " +this.__data__.gl.offencesRanges[0].top + "<\div>";
+	$('#dataDisplay').append(newtext);
+
 	
 
 });
+			
+
+});  //end of on change event
+
+
+//Changes to the selection box or anything on the form trigger an update
+//of the main graphic
+$('#guidelines').trigger("change");
+
+$('form[name="myform"]').on("change", function () {
+	$('#guidelines').trigger("change");
+
+});
+
+
+
+
+
+
+
 
 
 
@@ -518,12 +565,7 @@ function cross(a) {
 		};
 	}
 
-$('#guidelines').trigger("change");
 
-$('form[name="myform"]').on("change", function () {
-	$('#guidelines').trigger("change");
-
-	})
 
 
 
@@ -557,22 +599,7 @@ var updateSelections = function() {
 	}
 
 
-	// for (var i in mySelection){
-
-	// 	var alreadythere = false;
-
-	// 	for (j in selectionsInOrder) {
-	// 		if (mySelection[i] == selectionsInOrder[j]){
-	// 			alreadythere = true;
-	// 		}
-	// 	}
-
-	// 	if (alreadythere===false)  {
-	// 		selectionsInOrder.push(mySelection[i])
-	// 		data.push(JSONData[mySelection[i]]);
-	// 	}
-
-	// };
+	
 
 };
 

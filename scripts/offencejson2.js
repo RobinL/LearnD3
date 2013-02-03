@@ -5,16 +5,19 @@ var JSONData = [
 	
 	{offenceName: "GBH with intent",
 	colour: "#0072c1",
-	offencesRanges: [
-		{bottom: 9,
+		offencesRanges: [
+		{name: "Category 1",
+		bottom: 9,
 		startingpoint: 12,
 		top: 16
 		},
-		{bottom: 5,
+		{name: "Category 2",
+		bottom: 5,
 		startingpoint: 6,
 		top: 9
 		},
-		{bottom: 3,
+		{
+		name: "Category 3",bottom: 3,
 		startingpoint: 4,
 		top: 5
 		}
@@ -23,15 +26,19 @@ var JSONData = [
 	{offenceName: "GBH",
 	colour: "#0072c1",
 	offencesRanges: [
-		{bottom: 2.5,
+		{name: "Category 1",
+		bottom: 2.5,
 		startingpoint: 3,
 		top: 4
 		},
-		{bottom: 1,
+		{
+		name: "Category 2",
+		bottom: 1,
 		startingpoint: 1.5,
 		top: 3
 		},
-		{bottom: "Community Order",
+		{name: "Category 3",
+		bottom: "Community Order",
 		startingpoint: "Community Order",
 		top: 51/52
 		}
@@ -156,15 +163,18 @@ var JSONData = [
 	{offenceName: "Domestic burglary",
 	colour: "#4AAB2E",
 	offencesRanges: [
-		{bottom: 2,
+		{name: "Category 1",
+		bottom: 2,
 		startingpoint: 3,
 		top: 6
 		},
-		{bottom: "Community Order",
+		{name: "Category 2",
+		bottom: "Community Order",
 		startingpoint: 1,
 		top: 2
 		},
-		{bottom: "Community Order",
+		{name: "Category 3",
+		bottom: "Community Order",
 		startingpoint: "Community Order",
 		top: 0.5
 		}
@@ -173,15 +183,18 @@ var JSONData = [
 	{offenceName: "Non-domestic burglary",
 	colour: "#4AAB2E",
 	offencesRanges: [
-		{bottom: 1,
+		{name: "Category 1",
+		bottom: 1,
 		startingpoint: 2,
 		top: 5
 		},
-		{bottom: "Community Order",
+		{name: "Category 2",
+		bottom: "Community Order",
 		startingpoint: 18/52,
 		top: 51/52
 		},
-		{bottom: "Fine",
+		{name: "Category 3",
+		bottom: "Fine",
 		startingpoint: "Community Order",
 		top: 18/52
 		}

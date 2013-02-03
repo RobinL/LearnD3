@@ -56,7 +56,7 @@ svg.select(".axes")
 	.append("text")
 	.text("Sentence length in years")
 	.attr("dx", 350+padding+custodyWidth*3)
-	.attr("dy",35)
+	.attr("dy",35);
 
 
 
@@ -231,14 +231,14 @@ $('#guidelines').on("change", function () {
 				var spaceToSplit = glHeight - catHeight;
 				var spaceSplit = spaceToSplit/(d.gl.offencesRanges.length-1);
 
-		
 
 
 				return j*glSpacing + spaceSplit*i ;
 			})
 			.attr("height",function(d,i){
-
-				return glHeight/(d.gl.offencesRanges.length)-catSpacing;
+				numSpaces = d.gl.offencesRanges.length-1;
+				totalSpace =  numSpaces*catSpacing;;
+						return  (glHeight-totalSpace)/(d.gl.offencesRanges.length);
 			})
 			.attr("fill",function(d,i){
 
@@ -272,21 +272,16 @@ $('#guidelines').on("change", function () {
 
 						totalSpace =  numSpaces*catSpacing;
 
-						
 						var catHeight = (glHeight-totalSpace)/(d.gl.offencesRanges.length);
-
 						var spaceToSplit = glHeight - catHeight;
-
 						var spaceSplit = spaceToSplit/(d.gl.offencesRanges.length-1);
-
-
-						
-
 
 						return j*glSpacing + spaceSplit*i ;
 										
 					})
 					.attr("height",function(d,i){
+						numSpaces = d.gl.offencesRanges.length-1;
+						totalSpace =  numSpaces*catSpacing;;
 						return  (glHeight-totalSpace)/(d.gl.offencesRanges.length);
 					})
 					.attr("fill",function(d,i){
@@ -338,12 +333,7 @@ $('#guidelines').on("change", function () {
 						
 
 
-
-
-
-
-
-					
+			
 
 	guidelineGroups.exit()
 		.select(".guidelineGroupsRectanges")
@@ -354,19 +344,14 @@ $('#guidelines').on("change", function () {
 			svg.selectAll(".overallGuidelines")
 				.data(data)
 				.exit()
-				
 				.remove();
-		})
+		});
 
 	var newAxesPos = data.length*glSpacing;
 	var oldAxesPos = svg.select(".axes").data()[0];
 
-	//Update axis position
-
-		
-
-      
-	//Update gridlines
+	  
+	//Update gridlines, axis position, size of svg
 
 	if (newAxesPos-oldAxesPos > 20 ){
 		//axis animating up the page
@@ -380,7 +365,7 @@ $('#guidelines').on("change", function () {
 				.transition()
 				.delay(2*transitionDuration/4)
 				.duration(transitionDuration/2)
-				.style("opacity",1)
+				.style("opacity",1);
 
 
 		d3.selectAll("g .gridLines")
@@ -395,22 +380,22 @@ $('#guidelines').on("change", function () {
 		d3.select("#svgHolder svg")
 		.transition()
 		.duration(transitionDuration)
-		.attr("height",data.length*glSpacing+50)
+		.attr("height",data.length*glSpacing+50);
 	
 	}
 
 	else {
 		//axes going down the page
 		svg.select(".axes").data([data.length*glSpacing])
-			.transition()	
-			.delay(transitionDuration/2)	
+			.transition()
+			.delay(transitionDuration/2)
 			.duration(transitionDuration/2)
 			.attr("transform", "translate(0," + data.length*glSpacing + ")");
 
 		d3.selectAll("g .gridLines")
 		.data(gridData)
 		.transition()
-		.delay(transitionDuration/2)	
+		.delay(transitionDuration/2)
 		.duration(transitionDuration/2)
 		.attr("x1",function(d){return d;})
 		.attr("x2",function(d){return d;})
@@ -418,17 +403,16 @@ $('#guidelines').on("change", function () {
 		.attr("y2",data.length*glSpacing);
 
 		d3.select("#svgHolder svg")
-		.transition()	
-			.delay(transitionDuration/2)	
+		.transition()
+			.delay(transitionDuration/2)
 			.duration(transitionDuration/2)
-		.attr("height",data.length*glSpacing+50)
+		.attr("height",data.length*glSpacing+50);
 
 
 	}
 
 
 	//Labels etc
-
 	glNameLabels  = svg.selectAll(".glNameLabels").data(data);
 			
 	glNameLabels.enter()
@@ -444,14 +428,12 @@ $('#guidelines').on("change", function () {
 				return d.offenceName;
 			})
 			.style("opacity",0);
-
+			
 	glNameLabels
 			.transition()
-			.duration(transitionDuration/2)
-			.style("opacity",0)
-			.transition()
-			.duration(0)
+			.duration(transitionDuration)
 			.attr("class","glNameLabels")
+
 			.attr("dx", function(d) {
 						return 10+sentenceToPositionMapper(d.offencesRanges[0].top,0);
 					})
@@ -461,13 +443,15 @@ $('#guidelines').on("change", function () {
 			.text(function(d) {
 				return d.offenceName;
 			})
-			.transition()
-			.duration(transitionDuration/2)
-			.style("opacity",1)
+			.style("opacity",1);
+				
 			
-			
-			
-	glNameLabels.exit().remove();
+	glNameLabels
+		.exit()
+		.transition()
+		.duration(transitionDuration)
+		.style("opacity",0)
+		.remove();
 
 
 
@@ -481,7 +465,7 @@ $('.categoryRangeRect').on("click", function () {
 	d3.select(this)
 		.transition()
 		.duration(transitionDuration/4)
-		.attr("fill","#F4EF33")
+		.attr("fill","#F4EF33");
 
 	$('#dataDisplay').html("");
 
@@ -492,12 +476,12 @@ $('.categoryRangeRect').on("click", function () {
 	$('#dataDisplay').append(newtext);
 
 	var numcats = this.__data__.gl.offencesRanges.length;
-	newtext = "<div>The category range is: " +  this.__data__.cat.bottom
+	newtext = "<div>The category range is: " +  this.__data__.cat.bottom;
 	newtext = newtext + " to " +this.__data__.cat.top + "</div>";
 	$('#dataDisplay').append(newtext);
 
 	var numcats = this.__data__.gl.offencesRanges.length;
-	newtext = "<div>The overall guideline range is: " +  this.__data__.gl.offencesRanges[numcats-1].bottom
+	newtext = "<div>The overall guideline range is: " +  this.__data__.gl.offencesRanges[numcats-1].bottom;
 	newtext = newtext + " to " +this.__data__.gl.offencesRanges[0].top + "</div>";
 	$('#dataDisplay').append(newtext);
 

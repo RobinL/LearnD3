@@ -485,6 +485,22 @@ $('.categoryRangeRect').on("click", function () {
 	newtext = newtext + " to " +this.__data__.gl.offencesRanges[0].top + "</div>";
 	$('#dataDisplay').append(newtext);
 
+	d3.select("#dataDisplay")
+		.append("table")
+	.selectAll("tbofy tr").data(this.__data__.cat.data)
+		.enter()
+		.append("tr")
+		// .append("td")
+		.html(function(d){
+			for (i in d) {
+				var timeperiod =i;
+			}
+
+			var thisdata = d[timeperiod]
+			return "<td>"+timeperiod+"</td><td>"+thisdata.belowRange+"</td>"+"<td>"+thisdata.inRange+"</td>"+"<td>"+thisdata.aboveRange+"</td>" })
+
+
+
 });
 
 
@@ -509,6 +525,9 @@ $('.guidelineGroupsRectanges').on("click", function () {
 	newtext = "<div>The overall guideline range is: " +  this.__data__.offencesRanges[numcats-1].bottom
 	newtext = newtext + " to " +this.__data__.offencesRanges[0].top + "</div>";
 	$('#dataDisplay').append(newtext);
+
+	
+
 
 });
 			
